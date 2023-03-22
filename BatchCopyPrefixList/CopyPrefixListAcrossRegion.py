@@ -44,13 +44,5 @@ parser.add_argument('--RegionTo', type=str, help='target region: like us-east-1 
 parser.add_argument('--PrefixListIds', type=str, help='prefix list max_entries', nargs='?')
 args = parser.parse_args()
 
-
-events = {
-  'RegionFrom': 'us-east-1',
-  'RegionTo': 'us-east-2',
-  'PrefixListIds': 'pl-00dd4bd2c3a3d15b0'
-}
-context = {}
-
 script_handler(args, context)
 
