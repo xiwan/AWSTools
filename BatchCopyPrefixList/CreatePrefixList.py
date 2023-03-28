@@ -37,7 +37,6 @@ def script_handler(region, path, max_entries):
       )
       print(json.dumps(response['PrefixList'], indent=2))
 
-
 parser = argparse.ArgumentParser(description='create prefix list on any aws region')
 parser.add_argument('--region', type=str, help='target region: like us-east-1 or us-east-2')
 parser.add_argument('--path', type=str, help='the local folder path of csv files')
