@@ -12,7 +12,9 @@ Parameters:
     Description: Enter the sns receiver email address.
     Type: String
     AllowedPattern: ^[^@\s]+@[^@\s]+\.[^@\s]+$
-    
+  EventBridgeCron:
+    Description: The scheduling expression. For example, \"cron(0 20 * * ? *)\", \"rate(5 minutes)\".
+    Type: String    
 
 Conditions:
   CreateExampleDashboard: !Equals ["Yes", !Ref DoCreateExampleDashboard]
@@ -374,6 +376,30 @@ Resources:
       Subscription:
       - Endpoint: !Ref SNSEmailAddrss
         Protocol: email
+
+  ScheduledRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: "The scheduling expression. For example, \"cron(0 20 * * ? *)\", \"rate(5 minutes)\". "
+      ScheduleExpression: !Ref EventBridgeCron
+      State: "ENABLED"
+      Targets: 
+        - 
+          Arn: 
+            Fn::GetAtt: 
+              - "lambdaFunction"
+              - "Arn"
+          Id: "TargetFunctionV1"
+  PermissionForEventsToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: !Ref "lambdaFunction"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: 
+        Fn::GetAtt: 
+          - "ScheduledRule"
+          - "Arn"
 
   demoDashboard:
     Type: AWS::CloudWatch::Dashboard
