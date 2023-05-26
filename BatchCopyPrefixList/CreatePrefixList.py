@@ -8,7 +8,7 @@ import argparse
 def script_handler(region, path, max_entries):
 
   dir_list = os.listdir(path)
-   
+  print(dir_list)
   # prints all files
   for filename in dir_list:
     if filename.endswith(".csv"):
