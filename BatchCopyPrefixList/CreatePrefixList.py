@@ -13,7 +13,7 @@ def script_handler(region, path, max_entries):
   for filename in dir_list:
     if filename.endswith(".csv"):
       #print(filename)
-      csvfile = open(os.path.join(path, filename))
+      csvfile = open(os.path.join(path, filename),'r')
       lines = csvfile.readlines()
       entries = []
       count = 0
