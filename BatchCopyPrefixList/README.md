@@ -30,7 +30,12 @@ python3 CopyPrefixListAcrossRegion.py --RegionFrom=us-east-1 --RegionTo=us-east-
 #### 模拟执行:
 
 ```
-python3 CreatePrefixList.py --region=us-east-1 --path='/Users/benxiwan/Downloads/us-east-2/'  --max_entries=50 [--target_prefix_list_id=pl-00dd4bd2c3a3d15b0]
+# 将文件夹下的csv 创建到目标区域
+python3 CreatePrefixList.py --region=us-east-1 --path='/Users/benxiwan/Downloads/us-east-2/'  --max_entries=100
+
+# 将目标csv 创建到目标区域的目标prefixList，并且开启备份
+python3 CreatePrefixList.py --region=us-east-1 --path='/Users/benxiwan/Downloads/us-east-2/pl-123456.csv'  --max_entries=100 --backup=1 --target_prefix_list_id=pl-00dd4bd2c3a3d15b0
+
 ```
 #### 参数： 
 
@@ -38,3 +43,4 @@ python3 CreatePrefixList.py --region=us-east-1 --path='/Users/benxiwan/Downloads
 * path: 本地csv文件的路径，可以是文件夹路径，也可以是文件路径(.csv结尾)
 * max_entries 最大的entry数, 默认为50
 * target_prefix_list_id 如果不想建立新的prefix，设置目标prefixListID (可选)
+* backup 是否开启目标prefixListID备份(默认为0)

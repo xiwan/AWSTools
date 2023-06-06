@@ -7,7 +7,7 @@ import argparse
 import time
 
 
-def prefix_handler(region, filepath, filename, max_entries, target_prefix_list_id):
+def prefix_handler(region, filepath, filename, max_entries, target_prefix_list_id, backup):
   client = boto3.client('ec2', region_name=region)
 
   csvfile = open(filepath,'r')
@@ -41,10 +41,20 @@ def prefix_handler(region, filepath, filename, max_entries, target_prefix_list_i
     response = client.get_managed_prefix_list_entries(
       PrefixListId=target_prefix_list_id
     )
-
+    
     removeArry = []
     for entry in response['Entries']:
       removeArry.append({"Cidr": entry["Cidr"]})
+
+    # backup target prefix list id
+    if backup == 1:
+      response = client.create_managed_prefix_list(
+        # DryRun = True,
+        PrefixListName = target_prefix_list_id + '-backup',
+        MaxEntries = max_entries,
+        AddressFamily = 'IPv4',
+        Entries = response['Entries']
+      )
     
     # remove old entries
     if len(removeArry) > 0:
@@ -84,17 +94,17 @@ def prefix_handler(region, filepath, filename, max_entries, target_prefix_list_i
     print(json.dumps(response['PrefixList'], indent=2))
 
 
-def script_handler(region, path, max_entries, target_prefix_list_id):
+def script_handler(region, path, max_entries, target_prefix_list_id, backup):
 
   if path.endswith(".csv"):
     filename = os.path.basename(path)
-    prefix_handler(region, path, filename, max_entries, target_prefix_list_id)
+    prefix_handler(region, path, filename, max_entries, target_prefix_list_id, backup)
   else:
     dir_list = os.listdir(path)
     for filename in dir_list:
       if filename.endswith(".csv"):
         filepath = os.path.join(path, filename)
-        prefix_handler(region, filepath, filename, max_entries, target_prefix_list_id)
+        prefix_handler(region, filepath, filename, max_entries, target_prefix_list_id, backup)
 
   pass
 
@@ -104,7 +114,8 @@ parser.add_argument('--region', type=str, help='target region: like us-east-1 or
 parser.add_argument('--path', type=str, help='the local folder path of csv files')
 parser.add_argument('--max_entries', type=int, help='prefix list max_entries', nargs='?', default=50)
 parser.add_argument('--target_prefix_list_id', type=str, help='target prefix list id', nargs='?', default='')
+parser.add_argument('--backup', type=int, help='backup target prefix list', nargs='?', default=0)
 args = parser.parse_args()
 
 # path="/Users/benxiwan/Downloads/us-east-2/"
-script_handler(args.region, args.path, args.max_entries, args.target_prefix_list_id)
+script_handler(args.region, args.path, args.max_entries, args.target_prefix_list_id, args.backup)
