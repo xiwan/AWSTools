@@ -30,7 +30,7 @@ python3 CopyPrefixListAcrossRegion.py --RegionFrom=us-east-1 --RegionTo=us-east-
 #### 模拟执行:
 
 ```
-python3 CreatePrefixList.py --region=us-east-1 --path='/Users/benxiwan/Downloads/us-east-2/'  --max_entries=50
+python3 CreatePrefixList.py --region=us-east-1 --path='/Users/benxiwan/Downloads/us-east-2/'  --max_entries=50 [--target_prefix_list_id=pl-00dd4bd2c3a3d15b0]
 ```
 #### 参数： 
 
