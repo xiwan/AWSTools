@@ -1,0 +1,194 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template to create demo Custom Widget Lambda function. Change the stack name to set the name of the Lambda function. Once your stack is created, go to the CloudWatch Console Add widget modal to continue with your custom widget creation.
+
+Parameters:
+  DoCreateExampleDashboard:
+    Description: Do you want an example dashboard created that shows how the custom widget works?
+    Type: String
+    AllowedValues: [ 'Yes', 'No']
+    Default: 'No'
+  S3BucketName:
+    Description: Enter the source code bucket.
+    Type: String
+  S3KeyName:
+    Description: Enter the source code zip file name.
+    Type: String
+  SNSEmailAddrss:
+    Description: Enter the sns receiver email address.
+    Type: String
+    AllowedPattern: ^[^@\s]+@[^@\s]+\.[^@\s]+$
+  EventBridgeCron:
+    Description: The scheduling expression. For example, \"cron(0 20 * * ? *)\", \"rate(5 minutes)\".
+    Type: String    
+
+Conditions:
+  CreateExampleDashboard: !Equals ["Yes", !Ref DoCreateExampleDashboard]
+
+Resources:
+  lambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref S3KeyName
+      Description: "CloudWatch Custom Widget sample: display results of Athena queries"
+      FunctionName: !Sub ${AWS::StackName}
+      Handler: index.handler
+      MemorySize: 128
+      Role: !GetAtt lambdaIAMRole.Arn
+      Runtime: nodejs16.x
+      Timeout: 60
+      Tags:
+        - Key: cw-custom-widget
+          Value: describe:readWrite
+
+  lambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource:
+                  - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}:*
+          PolicyName: lambda
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                - s3:GetObject
+                - s3:PutObject
+                - s3:AbortMultipartUpload
+                - s3:ListMultipartUploadParts
+                - s3:DeleteObject
+                Resource:
+                - !Sub arn:aws:s3:::aws-cw-widget-athena-query-results-${AWS::AccountId}-${AWS::Region}/*
+              - Effect: Allow
+                Action:
+                - s3:GetBucketLocation
+                - s3:CreateBucket
+                - s3:ListBucket
+                - s3:ListBucketMultipartUploads
+                - s3:DeleteObject
+                Resource:
+                - !Sub arn:aws:s3:::aws-cw-widget-athena-query-results-${AWS::AccountId}-${AWS::Region}
+              - Effect: Allow
+                Action:
+                - athena:*
+                Resource:
+                - "*"
+              - Effect: Allow
+                Action:
+                - s3:Get*
+                - s3:List*
+                Resource:
+                - "*"
+              - Effect: Allow
+                Action:
+                - glue:CreateDatabase
+                - glue:DeleteDatabase
+                - glue:GetDatabase
+                - glue:GetDatabases
+                - glue:UpdateDatabase
+                - glue:CreateTable
+                - glue:DeleteTable
+                - glue:BatchDeleteTable
+                - glue:UpdateTable
+                - glue:GetTable
+                - glue:GetTables
+                - glue:BatchCreatePartition
+                - glue:CreatePartition
+                - glue:DeletePartition
+                - glue:BatchDeletePartition
+                - glue:UpdatePartition
+                - glue:GetPartition
+                - glue:GetPartitions
+                - glue:BatchGetPartition
+                Resource:
+                - "*"
+          PolicyName: athenaAccess
+
+  lambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}
+      RetentionInDays: 7
+
+  MySNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - Endpoint: !Ref SNSEmailAddrss
+        Protocol: email
+
+  ScheduledRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: "The scheduling expression. For example, \"cron(0 20 * * ? *)\", \"rate(5 minutes)\". "
+      ScheduleExpression: !Ref EventBridgeCron
+      State: "ENABLED"
+      Targets: 
+        - 
+          Arn: 
+            Fn::GetAtt: 
+              - "lambdaFunction"
+              - "Arn"
+          Id: "TargetFunctionV1"
+  PermissionForEventsToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: !Ref "lambdaFunction"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: 
+        Fn::GetAtt: 
+          - "ScheduledRule"
+          - "Arn"
+
+  demoDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Condition: CreateExampleDashboard
+    Properties:
+      DashboardName: !Sub ${AWS::StackName}-${AWS::Region}
+      DashboardBody:
+        !Sub
+          >
+          {
+              "widgets": [
+                  {
+                      "type": "custom",
+                      "width": 24,
+                      "height": 18,
+                      "properties": {
+                          "endpoint": "${lambdaFunction.Arn}",
+                          "params": {
+                              "region": "${AWS::Region}",
+                              "database": "default",
+                              "sql": "select count (uri) FROM cloudfront_logs WHERE status = 200 or status = 304"
+                          },
+                          "updateOn": {
+                              "refresh": true
+                          },
+                          "title": "Athena Query, ${AWS::Region}"
+                      }
+                  }
+              ]
+          }

@@ -1,9 +1,9 @@
 {
   "region": "us-east-1",
   "cloudWatch": {
-    "dashboardName": "Test027",
+    "dashboardName": "Test0704",
     "alarm": {
-      "name": "Test027",
+      "name": "Test0704",
       "description": "1000 as threshold",
       "threshold": 1000,
       "period": 300,
@@ -11,14 +11,17 @@
       "evaluationPeriods": 1,
       "comparisonOperator": "GreaterThanThreshold"
     },
-    "namespace": "Test027",
+    "namespace": "Test0704",
     "dimension": {
-      "name": "AppName2",
-      "value": "WanxiCDN2"
+      "name": "TestApp",
+      "value": "CDNCount"
     }
   },
-  "snsArn": "arn:aws:sns:us-east-1:614954710407:benxiwan027-MySNSTopic-g4p9GjKHSHNW",
-  "snsEmailSubject": "Test027",
+  "sns": {
+    "subject": "Test0704",
+    "arn": "arn:aws:sns:us-east-1:614954710407:benxiwan-0714-001-MySNSTopic-yZDTxNFJ9eaz",
+    "threshold": 1000
+  },
   "database": "default",
   "sqls": [
     {

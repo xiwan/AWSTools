@@ -123,6 +123,7 @@ const putResultToMetric = async (results, region, sql, database) => {
 
     const dashboardName = config.cloudWatch.dashboardName;
     const cw = new aws.CloudWatch({region});
+
     const params = {
         MetricData: [
             {
@@ -142,8 +143,8 @@ const putResultToMetric = async (results, region, sql, database) => {
     
     cw.putMetricData(params, function(err, data) {
         if (err) console.log(err, err.stack); // an error occurred
-        else     console.log(data);           // successful response
-        });
+        else console.log(data);           // successful response
+    });
 }
 
 // MetricName: colsAndVals[0]
@@ -152,11 +153,11 @@ const putResultToMetric = async (results, region, sql, database) => {
 const createalarm = async (results, region, sql, database) => {
 
     const colsAndVals = await getColsAndVals(results);
-    const snsArn = config.snaArn;
+    const snsArn = config.sns.arn;
     const cw = new aws.CloudWatch({region});
 
     const paramsalarm = {
-        AlarmNames: [ config.cloudWatch.alarmName ]
+        AlarmNames: [ config.cloudWatch.alarm.name ]
     };
     
     cw.describeAlarms(paramsalarm, function(err, data) {
@@ -165,7 +166,8 @@ const createalarm = async (results, region, sql, database) => {
             throw new Error(err);
         } else {
             // List the names of all current alarms in the console
-            // console.log(data.MetricAlarms.length);
+            console.log(config.cloudWatch.alarm.name);
+            console.log(data.MetricAlarms.length);
             if (data.MetricAlarms.length === 0) {
                 const params = 
                 {
@@ -243,7 +245,7 @@ const putDashboard = async (results, region, sql, database) => {
             "period": 300,
             "stat": "Average",
             "region": region,
-            "title": dashboardName+"-metric"
+            "title": dashboardName + "-metric"
         }
     }
 
@@ -292,8 +294,8 @@ const sendMessageToSNS = async (results, region, sql, database) => {
     var sns = new aws.SNS({region});
     let params = {
         Message: `${DOCS_TEXT} \n \n This was sent: ${now}`,
-        Subject: config.snsEmailSubject,
-        TopicArn: config.snsArn
+        Subject: config.sns.subject,
+        TopicArn: config.sns.arn
     };
     
     //console.log(JSON.stringify(params))
@@ -346,6 +348,7 @@ exports.handler = async (event, context) => {
                     throw new Error(`execution failed: ${e}.`);
                 }
             }
+
             await putResultToMetric(results, region, sql, database);
             await createalarm(results, region, sql, database);
             await putDashboard(results, region, sql, database);
