@@ -169,7 +169,7 @@ const createalarm = async (results, region, sql, database) => {
             if (data.MetricAlarms.length === 0) {
                 const params = 
                 {
-                    "Namespace": cloudWatch.namespace,
+                    "Namespace": config.cloudWatch.namespace,
                     "MetricName": colsAndVals[0],
                     "Dimensions": [
                         {
