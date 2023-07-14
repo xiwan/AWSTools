@@ -1,0 +1,28 @@
+{
+  "region": "us-east-1",
+  "cloudWatch": {
+    "dashboardName": "Test027",
+    "alarm": {
+      "name": "Test027",
+      "description": "1000 as threshold",
+      "threshold": 1000,
+      "period": 300,
+      "datapointsToAlarm": 1,
+      "evaluationPeriods": 1,
+      "comparisonOperator": "GreaterThanThreshold"
+    },
+    "namespace": "Test027",
+    "dimension": {
+      "name": "AppName2",
+      "value": "WanxiCDN2"
+    }
+  },
+  "snsArn": "arn:aws:sns:us-east-1:614954710407:benxiwan027-MySNSTopic-g4p9GjKHSHNW",
+  "snsEmailSubject": "Test027",
+  "database": "default",
+  "sqls": [
+    {
+      "statement": "select count (uri) FROM cloudfront_logs WHERE status = 200 or status = 304"
+    }
+  ]
+}

@@ -47,26 +47,12 @@ Resources:
           \`\`\`
           `;
 
-          const sqlJson = require('./sql.json');
+          const config = require('./config.json');
           const CHECK_QUERY_STATUS_DELAY_MS = 250;
           const CSS = '<style>td { white-space: nowrap; }</style>'
 
-          const executeQuery = async (athena, accountId, region, querySQL, database)  => {
-              const params = {
-                  QueryString: querySQL,
-                  ResultConfiguration: {
-                      OutputLocation: `s3://aws-cw-widget-athena-query-results-${accountId}-${region}`
-                  },
-                  QueryExecutionContext: {
-                      Database: database
-                  }
-              };
-            
-              const query = await athena.startQueryExecution(params).promise();
-            
-              // Wait until query is finished execution.
-              await checkQueryStatus(athena, query);
-              return await athena.getQueryResults({ QueryExecutionId: query.QueryExecutionId }).promise();
+          const sleep = async (delay) => {
+              return new Promise((resolve) => setTimeout(resolve, delay));
           }
 
           const checkQueryStatus = async (athena, query) => {
@@ -89,8 +75,22 @@ Resources:
               }
           }
 
-          const sleep = async (delay) => {
-              return new Promise((resolve) => setTimeout(resolve, delay));
+          const executeQuery = async (athena, accountId, region, querySQL, database)  => {
+              const params = {
+                  QueryString: querySQL,
+                  ResultConfiguration: {
+                      OutputLocation: `s3://aws-cw-widget-athena-query-results-${accountId}-${region}`
+                  },
+                  QueryExecutionContext: {
+                      Database: database
+                  }
+              };
+            
+              const query = await athena.startQueryExecution(params).promise();
+            
+              // Wait until query is finished execution.
+              await checkQueryStatus(athena, query);
+              return await athena.getQueryResults({ QueryExecutionId: query.QueryExecutionId }).promise();
           }
 
           const displayResults = async (database, sql, results, region, context) => {
@@ -143,53 +143,153 @@ Resources:
               return [cols_txt, rows_txt];
           }
 
-          const putResultToDashboard = async (dashboardName, results, region, sql, database) => {
+          // 传入cdn的域名或者应用名字 Distribution domain name
+          const putResultToMetric = async (results, region, sql, database) => {
 
               const colsAndVals = await getColsAndVals(results);
+
+              const dashboardName = config.cloudWatch.dashboardName;
+              const cw = new aws.CloudWatch({region});
+              const params = {
+                  MetricData: [
+                      {
+                          MetricName: colsAndVals[0], 
+                          Value: colsAndVals[1], 
+                          Unit: 'Count',
+                          Dimensions: [
+                              {
+                                  Name: config.cloudWatch.dimension.name,
+                                  Value: config.cloudWatch.dimension.value
+                              }
+                          ]
+                      }
+                  ],
+                  Namespace: config.cloudWatch.namespace
+              };
               
-              let DOCS_TEXT = `
-              ## MetaData 
+              cw.putMetricData(params, function(err, data) {
+                  if (err) console.log(err, err.stack); // an error occurred
+                  else     console.log(data);           // successful response
+                  });
+          }
+
+          // MetricName: colsAndVals[0]
+          // AlarmName 
+          // AlarmDescription
+          const createalarm = async (results, region, sql, database) => {
+
+              const colsAndVals = await getColsAndVals(results);
+              const snsArn = config.snaArn;
+              const cw = new aws.CloudWatch({region});
+
+              const paramsalarm = {
+                  AlarmNames: [ config.cloudWatch.alarmName ]
+              };
               
-              ### Region ${region}
-              ### SQL ${sql}
-              ### Database ${database}
+              cw.describeAlarms(paramsalarm, function(err, data) {
+                  if (err) {
+                      console.log("Error", err);
+                      throw new Error(err);
+                  } else {
+                      // List the names of all current alarms in the console
+                      // console.log(data.MetricAlarms.length);
+                      if (data.MetricAlarms.length === 0) {
+                          const params = 
+                          {
+                              "Namespace": cloudWatch.namespace,
+                              "MetricName": colsAndVals[0],
+                              "Dimensions": [
+                                  {
+                                      "Name": config.cloudWatch.dimension.name,
+                                      "Value": config.cloudWatch.dimension.value
+                                  }
+                              ],
+                              "ComparisonOperator": config.cloudWatch.alarm.comparisonOperator,
+                              "DatapointsToAlarm": config.cloudWatch.alarm.datapointsToAlarm,
+                              "EvaluationPeriods": config.cloudWatch.alarm.evaluationPeriods,
+                              "Period": config.cloudWatch.alarm.period,
+                              "Statistic": "Average",
+                              "Threshold": config.cloudWatch.alarm.threshold,
+                              "AlarmDescription": config.cloudWatch.alarm.description,
+                              "AlarmName": config.cloudWatch.alarm.name,
+                              "AlarmActions": [
+                                  snsArn
+                              ],
+                          };
+                  
+                          //console.log("Create alarm");
+                          cw.putMetricAlarm(params, function(err, data) {
+                              if (err) console.log(err, err.stack); // an error occurred
+                              else     console.log(data);           // successful response
+                          });
+                         // console.log("Nodata");
+                      };
+                 // data.MetricAlarms.forEach(function (item, index, array) {
+              //       console.log("find an alarm");
+               //      console.log(item.AlarmName);
+                 //});
+                  }
+              });
+          }
+
+          // metrics 和上面的值一致
+          const putDashboard = async (results, region, sql, database) => {
+
+              const colsAndVals = await getColsAndVals(results);
+              const dashboardName = config.cloudWatch.dashboardName;
               
-              ## Results
-              COL | VAL
-              ---|---
-              **${colsAndVals[0]}** | ${colsAndVals[1]}
-              `;
+              let DOCS_TEXT = await genStandardDocText(colsAndVals, region, sql, database);
               
               let final_dashboard_body = {'widgets': []};
-              let widget_template = {
-                   "type":"text",
-                   "x":0,
-                   "y":7,
-                   "width":10,
-                   "height":5,
-                   "properties":{
+              let widget_template_text = {
+                  "type":"text",
+                  "x":0,
+                  "y":7,
+                  "width":10,
+                  "height":5,
+                  "properties":{
                       "markdown": DOCS_TEXT
-                   }
-                }
-              final_dashboard_body.widgets[0] = widget_template;
+                  }
+              }
+
+              let widget_template_metric = {
+                  "type": "metric",
+                  "x": 0,
+                  "y": 6,
+                  "width": 12,
+                  "height": 6,
+                  "properties": {
+                      "metrics": [
+                          [
+                              config.cloudWatch.namespace, //namespace
+                              colsAndVals[0],    // metricname
+                              config.cloudWatch.dimension.name, // dimensionname
+                              config.cloudWatch.dimension.value // dimensionvalue
+                          ]
+                      ],
+                      "period": 300,
+                      "stat": "Average",
+                      "region": region,
+                      "title": dashboardName+"-metric"
+                  }
+              }
+
+              final_dashboard_body.widgets[0] = widget_template_text;
+              final_dashboard_body.widgets[1] = widget_template_metric;
               
               const cw = new aws.CloudWatch({region});
               const params = {
-                DashboardBody: JSON.stringify(final_dashboard_body), /* required */
-                DashboardName: dashboardName /* required */
+                  DashboardBody: JSON.stringify(final_dashboard_body), /* required */
+                  DashboardName: dashboardName /* required */
               };
               cw.putDashboard(params, function(err, data) {
-                if (err) console.log(err, err.stack); // an error occurred
-                else     console.log(data);           // successful response
+                  if (err) console.log(err, err.stack); // an error occurred
+                  else     console.log(data);           // successful response
               });
               
           }
 
-          const sendMessageToSNS = async (snsArn, subject, results, region, sql, database) => {
-              const colsAndVals = await getColsAndVals(results);
-              if (parseInt(colsAndVals[1]) <= 10)
-                  return;
-
+          const genStandardDocText = async (colsAndVals, region, sql, database) => {
               let DOCS_TEXT = `
               ## MetaData 
               
@@ -202,15 +302,25 @@ Resources:
               ---|---
               **${colsAndVals[0]}** | ${colsAndVals[1]}
               `;
+
+              return DOCS_TEXT;
+          };
+
+          const sendMessageToSNS = async (results, region, sql, database) => {
+
+              const colsAndVals = await getColsAndVals(results);
+
+              if (parseInt(colsAndVals[1]) <= config.cloudWatch.alarm.threshold)
+                  return;
+
+              let DOCS_TEXT = await genStandardDocText(colsAndVals, region, sql, database);
               
               let now = new Date().toString();
-              let email = `${DOCS_TEXT} \n \n This was sent: ${now}`;
-              
               var sns = new aws.SNS({region});
               let params = {
-                  Message: email,
-                  Subject: subject,
-                  TopicArn: snsArn
+                  Message: `${DOCS_TEXT} \n \n This was sent: ${now}`,
+                  Subject: config.snsEmailSubject,
+                  TopicArn: config.snsArn
               };
               
               //console.log(JSON.stringify(params))
@@ -221,6 +331,7 @@ Resources:
               });
           }
 
+          // main entry
           exports.handler = async (event, context) => {
               if (event.describe) {
                   return DOCS;   
@@ -230,19 +341,19 @@ Resources:
               const accountId = context.invokedFunctionArn.split(":")[4];
               const athena = new aws.Athena({ region });
               const widget = event.hasOwnProperty('widgetContext');
-              // console.log(widget)
+              
               if (widget)
               {
                   const form = event.widgetContext.forms.all;
                   const database = form.database || event.database || 'default';
+
                   const sql = form.sql || event.sql;
                   let results;
-
                   if (database && sql && sql.trim() !== '') {
                       try {
                           results = await executeQuery(athena, accountId, region, sql, database);
                       } catch (e) {
-                          results = e;
+                          throw new Error(`execution failed: ${e}.`);
                       }
                   }
                   
@@ -250,8 +361,8 @@ Resources:
               }
               else
               {
-                  const database = sqlJson.database || 'default';
-                  const sqls = sqlJson.sqls;
+                  const database = config.database || 'default';
+                  const sqls = config.sqls;
                   for (const item of sqls) {
                       const sql = item.statement;
                       let results;
@@ -259,15 +370,17 @@ Resources:
                           try {
                               results = await executeQuery(athena, accountId, region, sql, database);
                           } catch (e) {
-                              results = e;
+                              throw new Error(`execution failed: ${e}.`);
                           }
                       }
-                      await putResultToDashboard(sqlJson.dashboardName, results, region, sql, database);
-                      await sendMessageToSNS(sqlJson.snsArn, sqlJson.snsEmailSubject, results, region, sql, database)
+                      await putResultToMetric(results, region, sql, database);
+                      await createalarm(results, region, sql, database);
+                      await putDashboard(results, region, sql, database);
+                      await sendMessageToSNS(results, region, sql, database)
                   }
               }
 
-              return "200"
+              return "200";
           };
           
       Description: "CloudWatch Custom Widget sample: display results of Athena queries"
