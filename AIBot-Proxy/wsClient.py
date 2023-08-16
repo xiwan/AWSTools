@@ -62,7 +62,7 @@ class ConnectorKls(object):
             msg = self.inQ.get()
             print(f'In Working on {msg}')
 
-            await self.async_sendJsonObj(msg)
+            await self.async_sendByte(msg)
             print(f"In Sent: {msg}")
 
             res = await self.ws.recv()
@@ -97,11 +97,11 @@ class ConnectorKls(object):
             print(f"In [wsclient] flask global level: {threading.current_thread().name}")
             self.ws = websocket
 
-            message = "Hello, server!"
-            await self.ws.send(message)
-            logging.info(f"Sent: {message}")
+            # message = "Hello, server!"
+            # await self.ws.send(message)
+            # logging.info(f"Sent: {message}")
 
-            response = await self.ws.recv()
-            logging.info(f"Received: {response}")
+            # response = await self.ws.recv()
+            # logging.info(f"Received: {response}")
 
             await self.DeliverMsg()

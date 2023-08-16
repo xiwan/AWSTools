@@ -11,6 +11,7 @@ from wsClient import ConnectorKls, ConnectorPool
 logging.basicConfig(filename="test.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%M-%Y %H:%M:%S", level=logging.DEBUG)
 
 wsClient = None
+
 @run_async
 async def OnConnect(connectUri):
     async with websockets.connect(connectUri) as websocket:
@@ -41,6 +42,9 @@ if __name__ == "__main__":
     httpRev1.join()
     logging.info("Exit Main Program")
 
+
+
+ 
 
 
 
