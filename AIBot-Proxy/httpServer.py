@@ -4,7 +4,7 @@ from flask import Flask, request, session, jsonify, has_request_context, copy_cu
 from flask_script import Manager
 from functools import wraps
 from concurrent.futures import Future, ThreadPoolExecutor
-from Core.runAsync import run_async, remoteUri, secretKey
+from Core.runAsync import run_async, remoteUri, secretKey, logging
 from wssClient import WssConnector
 
 app = Flask(__name__)
@@ -29,7 +29,7 @@ def before_reql(*args, **kwargs):
     # finalize the global vars
     uid = session.get("sessionid")
     uid = remoteUri
-    
+
     pass
 
 @app.route('/', methods=['GET', 'POST'])
@@ -65,4 +65,4 @@ async def action():
 async def state():
     reqjson = request.get_json() 
     ws.PutInMsg(reqjson)
-    return await ws.FetchMsg()
+    return await ws.FetchSateMsg()

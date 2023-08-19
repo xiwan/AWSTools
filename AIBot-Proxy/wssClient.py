@@ -4,7 +4,8 @@ import time
 import json
 import queue
 
-from Core.runAsync import run_async, remoteUri, secretKey, binary
+from Core.runAsync import run_async, remoteUri, secretKey, binary, logging
+import asyncio
 
 def singleton(cls):
     _instance = {}
@@ -21,6 +22,7 @@ class WssConnector(object):
         pass
         self.ws = None
         self.remoteUri = None
+        self.lastState = None
         self.inQ = queue.Queue() # request message queue
         self.outQ = queue.Queue() # response message queue
         self.stateQ = queue.Queue() # state messsage queue
@@ -35,6 +37,9 @@ class WssConnector(object):
     
     def PutOutMsg(self, msg):
         self.outQ.put(msg)
+    
+    def PutSateMsg(self, msg):
+        self.stateQ.put(msg)
 
     def SendJson(self, cmd):
         return self.ws.send(json.dumps(cmd))
@@ -49,9 +54,9 @@ class WssConnector(object):
     def Run(self, *args):
         while True:
             msg = self.inQ.get()
-            print(f"In Sent {binary} format: {msg}")
+            logging.info(f"### Run ### {binary} format: {msg}")
             if binary == 1:
-                self.SendByte(msg) # .encode('utf-8') for binary
+                self.SendByte(msg) 
             else:
                 self.SendJson(msg)
             
@@ -59,25 +64,54 @@ class WssConnector(object):
 
     async def FetchMsg(self):
         while True:
-            msg = self.outQ.get()
-            print(f'### FetchMsg ### {msg}')
-            self.outQ.task_done()
+            await asyncio.sleep(0.1)
+            try:
+                msg = self.outQ.get(timeout=1)
+                self.outQ.task_done()
+            except queue.Empty: 
+                logging.info(f"queue.Empty")
+                msg = None    
+            logging.info(f'### FetchMsg ### {msg}')
+            return msg
+        
+    async def FetchSateMsg(self):
+        while True:
+            await asyncio.sleep(0.1)
+            try:
+                msg = self.stateQ.get(timeout=1)
+                if not msg is None:
+                    self.lastState = msg
+                self.stateQ.task_done()
+            except Exception as error: 
+                logging.info(f"queue.Empty")
+                msg = self.lastState
+            logging.info(f'### FetchSateMsg ### {msg} ')
+
             return msg
 
     def OnMessage(self, ws, msg):
-        print(f"### OnMessage ###: {msg}")
-        self.PutOutMsg(msg)
+        if isinstance(msg, bytes):
+            self.PutSateMsg(msg)
+            # msg = msg[4:]
+            # msg = msg.decode()
+            logging.info(f"### OnMessage bytes ###: {msg}")
+
+        elif isinstance(msg, str):
+            self.PutOutMsg(msg)
+            logging.info(f"### OnMessage str ###: {msg}")
+            
 
     def OnError(self, ws, error):
-        print(error)
+        logging.info(error)
 
     def OnClose(self, ws, close_status_code, close_msg):
-        print(f"### closed ### {close_status_code} : {close_msg}")
+        logging.info(f"### closed ### {close_status_code} : {close_msg}")
         self.ws = None
         self.remoteUri = None
+        self.lastState = None
 
     def OnOpen(self, ws):
-        print("### Opened connection ###")
+        logging.info("### Opened connection ###")
         thread.start_new_thread(self.Run, ())
 
     @run_async
