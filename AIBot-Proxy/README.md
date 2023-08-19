@@ -23,10 +23,14 @@ python3 proxy.py runserver --host 0.0.0.0
 
 ```
 [config]
-remoteUri = ws://localhost:8765 # ws server location
-secretKey = benxiwan 
+# ws server location
+remoteUri = ws://localhost:8765
+# flask server key
+secretKey = benxiwan
+# flask server listen to 
 listen = 0.0.0.0
 port = 5000
+# type of wss client payload: 0: str 1: bytes
 binary = 0
 
 
