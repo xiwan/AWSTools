@@ -18,3 +18,23 @@ python3 proxy.py runserver --host 0.0.0.0
 * http://0.0.0.0:5000/state
 * http://0.0.0.0:5000/reset
 * http://0.0.0.0:5000/action
+
+### how to config
+
+```
+[config]
+remoteUri = ws://localhost:8765 # ws server location
+secretKey = benxiwan 
+listen = 0.0.0.0
+port = 5000
+binary = 0
+
+
+[route]
+init = []
+action = []
+reset = []
+state = [1017,4096,4993]
+```
+
+

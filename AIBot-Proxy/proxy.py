@@ -4,7 +4,7 @@ import threading
 import websockets
 
 from wsHandler import CustomThread
-from httpServer import manager, run_async, remoteUri, secretKey, logging
+from httpServer import manager, run_async, remoteUri, logging
 from wssClient import WssConnector
 
 # wsClient = None

@@ -4,17 +4,12 @@ import time
 import json
 import queue
 
-from Core.runAsync import run_async, remoteUri, secretKey, binary, logging
+from Core.runAsync import run_async, decodeLittle, decodeBig, singleton, logging, config, routeTable
 import asyncio
 
-def singleton(cls):
-    _instance = {}
-
-    def inner():
-        if cls not in _instance:
-            _instance[cls] = cls()
-        return _instance[cls]
-    return inner
+remoteUri = config['remoteUri']
+secretKey = config['secretKey']
+binary = config['binary']
 
 @singleton
 class WssConnector(object):
@@ -91,9 +86,12 @@ class WssConnector(object):
 
     def OnMessage(self, ws, msg):
         if isinstance(msg, bytes):
-            self.PutSateMsg(msg)
-            # msg = msg[4:]
-            # msg = msg.decode()
+            code  =decodeLittle(msg[:4])
+            if code in eval(routeTable['state']):
+                self.PutSateMsg(msg)
+            else :
+                self.PutOutMsg(msg)
+
             logging.info(f"### OnMessage bytes ###: {msg}")
 
         elif isinstance(msg, str):

@@ -15,6 +15,9 @@ from configparser import ConfigParser
 cfg = ConfigParser()
 cfg.read("./env.local.ini")
 
+config = cfg['config']
+routeTable = cfg['route']
+
 remoteUri = cfg['config']['remoteUri']
 secretKey = cfg['config']['secretKey']
 binary = cfg['config']['binary']
@@ -46,3 +49,19 @@ def run_async(func):
         return call_result.result()
  
     return _wrapper
+
+
+def decodeLittle(CSID): 
+  return int.from_bytes(CSID, byteorder='little')
+
+def decodeBig(CSID): 
+  return int.from_bytes(CSID, byteorder='big')
+
+def singleton(cls):
+    _instance = {}
+
+    def inner():
+        if cls not in _instance:
+            _instance[cls] = cls()
+        return _instance[cls]
+    return inner
