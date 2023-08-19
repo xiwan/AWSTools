@@ -11,11 +11,11 @@ async def echo(websocket, path):
     # print(f"Send message: {message}")
 
 async def testSend(websocket, path):
-  # message = "test"
-  # await websocket.send(f"{message}")
-  # print(f"Send message text: {message}")
+  message = "test"
+  await websocket.send(f"{message}")
+  print(f"Send message text: {message}")
 
-  message2 = Getbyte(1018) + GetPayload()
+  message2 = Getbyte(1017) + GetPayload()
   await websocket.send(message2)
   print(f"Send message binary: {message2}")
   

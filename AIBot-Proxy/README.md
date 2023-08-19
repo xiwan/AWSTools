@@ -1,15 +1,28 @@
 # AIBot-Proxy
 
+## Architecture 
+
+![proxy](./images/AIBOT.png "proxy server")
+
+
+the proxy server has 2 purposes:
+
++ serving as a http server for sagemaker endpoint
++ playing as wss client for custom protocol adaptation
+
+Moreover, it depends on the designer's grouping of the Dedicated server APIs into 4 domains: **Init** **State** **Reset** and **Action** to complete the Reinforcement Learning Architecture
+
+![proxy](./images/ReInforcementLearningChart.png "proxy server")
 
 ## How to start
 
-### websocket server port: 8765
+### a testing websocket server port: 8765
 
 python3 wsserver.py
 
-### httpsrever server port: 5000
+### proxysrever (wssclient + httpserver)
 
-python3 proxy.py runserver --host 0.0.0.0
+python3 proxy.py runserver -h 0.0.0.0 -p 5000
 
 ### curl following apis
 
