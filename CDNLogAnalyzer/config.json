@@ -1,0 +1,31 @@
+{
+  "region": "us-east-1",
+  "cloudWatch": {
+    "dashboardName": "Test0704",
+    "alarm": {
+      "name": "Test0704",
+      "description": "1000 as threshold",
+      "threshold": 1000,
+      "period": 300,
+      "datapointsToAlarm": 1,
+      "evaluationPeriods": 1,
+      "comparisonOperator": "GreaterThanThreshold"
+    },
+    "namespace": "Test0704",
+    "dimension": {
+      "name": "TestApp",
+      "value": "CDNCount"
+    }
+  },
+  "sns": {
+    "subject": "Test0704",
+    "arn": "arn:aws:sns:us-east-1:614954710407:benxiwan-0714-001-MySNSTopic-yZDTxNFJ9eaz",
+    "threshold": 1000
+  },
+  "database": "default",
+  "sqls": [
+    {
+      "statement": "select count (uri) FROM cloudfront_logs WHERE status = 200 or status = 304"
+    }
+  ]
+}
