@@ -10,7 +10,7 @@ the proxy server has 2 purposes:
 + serving as a http server for sagemaker endpoint
 + playing as wss client for custom protocol adaptation
 
-Moreover, it depends on the designer's grouping of the Dedicated server APIs into 4 domains: **Init** **State** **Reset** and **Action** to complete the Reinforcement Learning Architecture
+Moreover, it final implementation depends on the designer's categorization of the Dedicated server APIs, which usually refers to 4 domains: **Init** **State** **Reset** and **Action** , to complete the Reinforcement Learning Architecture
 
 ![proxy](./images/ReInforcementLearningChart.png "proxy server")
 

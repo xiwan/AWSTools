@@ -61,7 +61,7 @@ class WssConnector(object):
         while True:
             await asyncio.sleep(0.1)
             try:
-                msg = self.outQ.get(timeout=1)
+                msg = self.outQ.get(timeout=0.5)
                 self.outQ.task_done()
             except queue.Empty: 
                 logging.info(f"queue.Empty")
@@ -73,7 +73,7 @@ class WssConnector(object):
         while True:
             await asyncio.sleep(0.1)
             try:
-                msg = self.stateQ.get(timeout=1)
+                msg = self.stateQ.get(timeout=0.5)
                 if not msg is None:
                     self.lastState = msg
                 self.stateQ.task_done()
@@ -86,7 +86,7 @@ class WssConnector(object):
 
     def OnMessage(self, ws, msg):
         if isinstance(msg, bytes):
-            code  =decodeLittle(msg[:4])
+            code = decodeLittle(msg[:4])
             if code in eval(routeTable['state']):
                 self.PutSateMsg(msg)
             else :
