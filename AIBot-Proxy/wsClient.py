@@ -4,6 +4,7 @@ import websockets
 import logging
 import json
 import queue
+import _thread as thread
 
 from Core.runAsync import run_async, remoteUri, secretKey
 
@@ -62,14 +63,20 @@ class ConnectorKls(object):
             msg = self.inQ.get()
             print(f'In Working on {msg}')
 
-            await self.async_sendByte(msg)
+            await self.async_sendJsonObj(msg)
             print(f"In Sent: {msg}")
 
             res = await self.ws.recv()
             print(f"In Received: {res}")
-
             self.PutOutMsg(res)
             self.inQ.task_done()
+
+    async def ReceiveMsg(self):     
+        while True:
+            res = await self.ws.recv()
+            print(f"Out Received: {res}")
+            self.PutOutMsg(res)
+            self.outQ.task_done()  
 
     async def FetchMsg(self):
         while True:
@@ -91,17 +98,12 @@ class ConnectorKls(object):
     @run_async
     async def OnConnect(self, remoteUri):
         self.remoteUri = remoteUri
-        # print("=============", remoteUri)
-        # print(self.ws)
         async with websockets.connect(self.remoteUri) as websocket:
             print(f"In [wsclient] flask global level: {threading.current_thread().name}")
             self.ws = websocket
 
-            # message = "Hello, server!"
-            # await self.ws.send(message)
-            # logging.info(f"Sent: {message}")
-
-            # response = await self.ws.recv()
-            # logging.info(f"Received: {response}")
-
+            # thread.start_new_thread(self.ReceiveMsg, ())
+            # thread.start_new_thread(self.DeliverMsg, ())
+            await self.ReceiveMsg()
             await self.DeliverMsg()
+            

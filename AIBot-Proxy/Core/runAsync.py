@@ -15,6 +15,7 @@ cfg.read("./env.local.ini")
 
 remoteUri = cfg['config']['remoteUri']
 secretKey = cfg['config']['secretKey']
+binary = cfg['config']['binary']
 
 def run_async(func):
     @wraps(func)

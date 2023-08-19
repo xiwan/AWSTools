@@ -5,12 +5,11 @@ from flask_script import Manager
 from functools import wraps
 from concurrent.futures import Future, ThreadPoolExecutor
 from Core.runAsync import run_async, remoteUri, secretKey
-from wsClient import ConnectorKls, ConnectorPool
+from wssClient import WssConnector
 
 app = Flask(__name__)
 app.secret_key = secretKey
 manager = Manager(app)
-pool = ConnectorPool()
 
 uid = None
 ws = None
@@ -23,19 +22,14 @@ def before_reql(*args, **kwargs):
         uid = uuid.uuid1()
         session["sessionid"] = uid
 
-    ws = pool.GetConn(str(uid))
-    if ws is None:
-        ws = ConnectorKls()
-        pool.RegConn(uid, ws)
-        # pool.BuildConns()
+    ws = WssConnector()
 
     if not ws or not uid:
         return str(404)
     # finalize the global vars
     uid = session.get("sessionid")
     uid = remoteUri
-    ws = pool.GetConn(uid)    
-    print(uid, ws)  
+    
     pass
 
 @app.route('/', methods=['GET', 'POST'])

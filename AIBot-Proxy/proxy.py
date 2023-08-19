@@ -6,7 +6,7 @@ import logging
 
 from wsHandler import CustomThread
 from httpServer import manager, run_async, remoteUri, secretKey
-from wsClient import ConnectorKls, ConnectorPool
+from wssClient import WssConnector
 
 logging.basicConfig(filename="test.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%M-%Y %H:%M:%S", level=logging.DEBUG)
 
@@ -28,13 +28,10 @@ if __name__ == "__main__":
     s = time.time()
     logging.info(f"In [Main] flask global level: {threading.current_thread().name}")
 
-    ws = ConnectorKls()
-
-    pool = ConnectorPool()
-    pool.RegConn(remoteUri, ws)
+    wss = WssConnector()
     
     httpRev1 = CustomThread(manager.run, ())
-    wsAdaptor = CustomThread(pool.BuildConns, (remoteUri,))
+    wsAdaptor = CustomThread(wss.OnConnect, (remoteUri,))
 
     wsAdaptor.start()
     httpRev1.start()
