@@ -57,6 +57,9 @@ def decodeLittle(CSID):
 def decodeBig(CSID): 
   return int.from_bytes(CSID, byteorder='big')
 
+def getbyteLitte(CSID): 
+  return CSID.to_bytes(4, byteorder='little')
+
 def singleton(cls):
     _instance = {}
 

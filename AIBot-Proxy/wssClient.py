@@ -4,7 +4,7 @@ import time
 import json
 import queue
 
-from Core.runAsync import run_async, decodeLittle, decodeBig, singleton, logging, config, routeTable
+from Core.runAsync import run_async, decodeLittle, decodeBig, getbyteLitte, singleton, logging, config, routeTable
 import asyncio
 
 remoteUri = config['remoteUri']
@@ -65,7 +65,7 @@ class WssConnector(object):
                 self.outQ.task_done()
             except queue.Empty: 
                 logging.info(f"queue.Empty")
-                msg = None    
+                msg = getbyteLitte(0000)    
             logging.info(f'### FetchMsg ### {msg}')
             return msg
         
@@ -79,7 +79,10 @@ class WssConnector(object):
                 self.stateQ.task_done()
             except Exception as error: 
                 logging.info(f"queue.Empty")
-                msg = self.lastState
+                if not self.lastState is None:
+                    msg = self.lastState
+                else:
+                    msg = getbyteLitte(0000)
             logging.info(f'### FetchSateMsg ### {msg} ')
 
             return msg
