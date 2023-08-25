@@ -22,6 +22,12 @@ class WssConnector(object):
         self.outQ = queue.Queue() # response message queue
         self.stateQ = queue.Queue() # state messsage queue
 
+        self.stateDict = {}
+        for code in eval(routeTable['state']):
+            self.stateDict[code] = queue.Queue()
+        logging.info(f"### WssConnector create stateDict ### size: {len(self.stateDict)} ")
+
+
     def GetConnector(self):
         if self.ws == None:
             self.OnConnect(self.remoteUri)
@@ -35,6 +41,10 @@ class WssConnector(object):
     
     def PutSateMsg(self, msg):
         self.stateQ.put(msg)
+
+    def PutSateDictMsg(self, code, msg):
+        if code in self.stateDict:
+            self.stateDict[code].put(msg)
 
     def SendJson(self, cmd):
         return self.ws.send(json.dumps(cmd))
@@ -64,7 +74,7 @@ class WssConnector(object):
                 msg = self.outQ.get(timeout=0.5)
                 self.outQ.task_done()
             except queue.Empty: 
-                logging.info(f"queue.Empty")
+                logging.info(f"Out queue.Empty")
                 msg = getbyteLitte(0000)    
             logging.info(f'### FetchMsg ### {msg}')
             return msg
@@ -73,12 +83,12 @@ class WssConnector(object):
         while True:
             await asyncio.sleep(0.1)
             try:
-                msg = self.stateQ.get(timeout=0.5)
+                msg = self.stateQ.get(timeout=0.3)
                 if not msg is None:
                     self.lastState = msg
                 self.stateQ.task_done()
             except Exception as error: 
-                logging.info(f"queue.Empty")
+                logging.info(f"State queue.Empty")
                 if not self.lastState is None:
                     msg = self.lastState
                 else:
@@ -86,12 +96,33 @@ class WssConnector(object):
             logging.info(f'### FetchSateMsg ### {msg} ')
 
             return msg
+        
+    async def FetchSateDictMsg(self, code):
+        while True:
+            await asyncio.sleep(0.1)
+            try:
+                msg = None
+                if code in self.stateDict:
+                    msg = self.stateDict[code].get(timeout=0.3)
+                if not msg is None:
+                    self.lastState = msg
+                self.stateDict[code].task_done()
+            except Exception as error: 
+                logging.info(f"{code} queue.Empty")
+                if not self.lastState is None:
+                    msg = self.lastState
+                else:
+                    msg = getbyteLitte(0000)
+            logging.info(f'### FetchSateDictMsg ### {code}={msg} ')
+
+            return msg
 
     def OnMessage(self, ws, msg):
         if isinstance(msg, bytes):
             code = decodeLittle(msg[:4])
             if code in eval(routeTable['state']):
-                self.PutSateMsg(msg)
+                # self.PutSateMsg(msg)
+                self.PutSateDictMsg(code, msg)
             else :
                 self.PutOutMsg(msg)
 

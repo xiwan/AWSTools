@@ -23,7 +23,7 @@ from wssClient import WssConnector
 
 if __name__ == "__main__":
     s = time.time()
-    logging.info(f"In [Main] flask global level: {threading.current_thread().name}")
+    print(f"In [{threading.current_thread().name}] flask global id: {str(threading.current_thread().ident)}")
 
     wss = WssConnector()
     

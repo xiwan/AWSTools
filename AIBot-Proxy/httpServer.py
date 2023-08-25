@@ -64,5 +64,9 @@ async def action():
 @run_async
 async def state():
     reqjson = request.get_json() 
-    ws.PutInMsg(reqjson)
-    return await ws.FetchSateMsg()
+    # ws.PutInMsg(reqjson)
+    code = 0
+    if 'code' in reqjson:
+        code = reqjson['code']
+
+    return await ws.FetchSateDictMsg(code)

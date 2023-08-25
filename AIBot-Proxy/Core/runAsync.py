@@ -22,7 +22,7 @@ remoteUri = cfg['config']['remoteUri']
 secretKey = cfg['config']['secretKey']
 binary = cfg['config']['binary']
 
-logfileName = date.today().strftime('%Y-%m-%d')
+logfileName = date.today().strftime('%Y-%m-%d') + "-" +  str(threading.current_thread().ident)
 logging.basicConfig(filename=f"./logs/proxy-{logfileName}.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%M-%Y %H:%M:%S", level=logging.DEBUG)
 
 def run_async(func):
