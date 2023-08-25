@@ -104,8 +104,11 @@ class WssConnector(object):
                 msg = None
                 if code in self.stateDict:
                     msg = self.stateDict[code].get(timeout=0.3)
+                
+                # return all state
                 if not msg is None:
                     self.lastState = msg
+                    
                 self.stateDict[code].task_done()
             except Exception as error: 
                 logging.info(f"{code} queue.Empty")
