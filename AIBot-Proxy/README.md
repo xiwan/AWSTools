@@ -32,7 +32,7 @@ python3 proxy.py runserver -h 0.0.0.0 -p 5000
 * http://0.0.0.0:5000/reset
 * http://0.0.0.0:5000/action
 
-you can pass a json {"code": 10117} to get targeting queue msg, if code = 0, it will return last successful state msg
+**state**: you can pass a json {"code": 10117} to get targeting queue msg, if code = 0, it will return last successful state msg
 
 ### how to config
 
