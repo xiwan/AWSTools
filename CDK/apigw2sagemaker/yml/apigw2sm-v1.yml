@@ -1,0 +1,228 @@
+Parameters:
+  SageMakerEndpointName:
+    Type: String
+    Description: The name of the Amazon SageMaker Endpoint.
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+Resources:
+  apigw2smPolicyFD06AE3A:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: sagemaker:InvokeEndpoint
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: apigw2smPolicyFD06AE3A
+      Roles:
+        - Ref: apigw2smLambdaServiceRole7989A298
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-Policy/Resource
+  apigw2smLambdaServiceRole7989A298:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-Lambda/ServiceRole/Resource
+  apigw2smLambda7FBB2D4B:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import os
+          import io
+          import boto3
+          import json
+          import csv
+
+          # grab environment variables
+          ENDPOINT_NAME = os.environ['ENDPOINT_NAME']
+          runtime= boto3.client('runtime.sagemaker')
+
+          def lambda_handler(event, context):
+              print("Received event: " + json.dumps(event, indent=2))
+              
+              inputsData = {'inputs': event}
+              data = json.dumps(inputsData)
+              payload = data
+              
+              # print("=================1")
+              # print(payload)
+              
+              response = runtime.invoke_endpoint(
+                  EndpointName=ENDPOINT_NAME,
+                  ContentType='application/json',
+                  Accept = "application/json",
+                  Body=payload)
+                 
+              # print("=================2")
+              # print(response)
+              result = json.loads(response['Body'].read().decode())
+              print(result)
+              
+              return 200
+
+      Environment:
+        Variables:
+          ENDPOINT_NAME: !Ref SageMakerEndpointName
+      Handler: index.lambda_handler
+      Role:
+        Fn::GetAtt:
+          - apigw2smLambdaServiceRole7989A298
+          - Arn
+      Runtime: python3.9
+    DependsOn:
+      - apigw2smLambdaServiceRole7989A298
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-Lambda/Resource
+      aws:asset:path: asset.c454e24080d599719ed65a47735eb04e7808ba770b9bfdcbc822ce39bde40de6
+      aws:asset:is-bundled: false
+      aws:asset:property: Code
+  apigw2smGW80A6AB89:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: apigw2sm-GW
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-GW/Resource
+  apigw2smGWDeploymentA553AAD8bd1690ab2362ea70e03983fd11d064d5:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: Automatically created by the RestApi construct
+      RestApiId:
+        Ref: apigw2smGW80A6AB89
+    DependsOn:
+      - apigw2smGWitemsPOST72D343AF
+      - apigw2smGWitems3F0FFB19
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-GW/Deployment/Resource
+  apigw2smGWDeploymentStageprod75E5AC80:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId:
+        Ref: apigw2smGWDeploymentA553AAD8bd1690ab2362ea70e03983fd11d064d5
+      RestApiId:
+        Ref: apigw2smGW80A6AB89
+      StageName: prod
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-GW/DeploymentStage.prod/Resource
+  apigw2smGWitems3F0FFB19:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt:
+          - apigw2smGW80A6AB89
+          - RootResourceId
+      PathPart: items
+      RestApiId:
+        Ref: apigw2smGW80A6AB89
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-GW/Default/items/Resource
+  apigw2smGWitemsPOSTApiPermissionCdkStackapigw2smGW27EEFD38POSTitemsC87915A3:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - apigw2smLambda7FBB2D4B
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:aws:execute-api:us-east-1:614954710407:"
+            - Ref: apigw2smGW80A6AB89
+            - /
+            - Ref: apigw2smGWDeploymentStageprod75E5AC80
+            - /POST/items
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-GW/Default/items/POST/ApiPermission.CdkStackapigw2smGW27EEFD38.POST..items
+  apigw2smGWitemsPOSTApiPermissionTestCdkStackapigw2smGW27EEFD38POSTitems9D8DE0F7:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - apigw2smLambda7FBB2D4B
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:aws:execute-api:us-east-1:614954710407:"
+            - Ref: apigw2smGW80A6AB89
+            - /test-invoke-stage/POST/items
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-GW/Default/items/POST/ApiPermission.Test.CdkStackapigw2smGW27EEFD38.POST..items
+  apigw2smGWitemsPOST72D343AF:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        IntegrationHttpMethod: POST
+        IntegrationResponses:
+          - StatusCode: "200"
+        Type: AWS
+        Uri:
+          Fn::Join:
+            - ""
+            - - arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - apigw2smLambda7FBB2D4B
+                  - Arn
+              - /invocations
+      MethodResponses:
+        - StatusCode: "200"
+      ResourceId:
+        Ref: apigw2smGWitems3F0FFB19
+      RestApiId:
+        Ref: apigw2smGW80A6AB89
+    Metadata:
+      aws:cdk:path: CdkStack/apigw2sm-GW/Default/items/POST/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/01Oy26DQAz8ltwXtym59Ji06q0qIh8QOYtLHfaBWK8ihPj37kKqcpoZz3jsF3gt4XmH91DopisMX2E6C+pOvX27Cge0JDSo5F8mRgtT5Q3rcXFXVntDWWaclUF7bRCmj+i0sHfZ2fKKBsshJDWrUF4wBJIAxwxJwynqjuSEgRT23KLQHUeYagpy7Hk586Dv1Bs/WnKSpxuVvm+Xh1aS8j4OmpbOP/EoWvknyY9v8mhl8/yfWx7LRezanPiK0kfZrs+qGtOWeyphv4fD7haYiyE6YUtQr/gLF3RDdmUBAAA=
+    Metadata:
+      aws:cdk:path: CdkStack/CDKMetadata/Default
+Outputs:
+  apigw2smGWEndpoint0449B285:
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: apigw2smGW80A6AB89
+          - .execute-api.us-east-1.
+          - Ref: AWS::URLSuffix
+          - /
+          - Ref: apigw2smGWDeploymentStageprod75E5AC80
+          - /
+Rules:
+  CheckBootstrapVersion:
+    Assertions:
+      - Assert:
+          Fn::Not:
+            - Fn::Contains:
+                - - "1"
+                  - "2"
+                  - "3"
+                  - "4"
+                  - "5"
+                - Ref: BootstrapVersion
+        AssertDescription: CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.
+
