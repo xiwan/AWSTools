@@ -13,11 +13,12 @@ class CdkStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        RestApiName  = CfnParameter(self, 'RestApiName', 
-                                        type="String",
-                                        description="The name of the restful API.")
-        RestApiName = self.node.try_get_context('RestApiName')
+        # RestApiName  = CfnParameter(self, 'RestApiName', 
+        #                                 type="String",
+        #                                 description="The name of the restful API.")
+        # RestApiName = self.node.try_get_context('RestApiName')
         #RestApiName = RestApiName.value_as_string
+        RestApiName = "apigw2sm"
 
         SageMakerEndpointName  = CfnParameter(self, 'SageMakerEndpointName', 
                                         type="String",
