@@ -14,11 +14,25 @@ Moreover, it final implementation depends on the designer's categorization of th
 
 ![proxy](./images/ReInforcementLearningChart.png "proxy server")
 
+## Protos
+
+Some dedicated server only serve protos, hence I designed a translation from proto(python) to json format.
+
+### brief
+
+proto is a faster serilization/deserilization method comparing to json/txt format. To use it, a proto extension for schema is needed, and a proto compilier is used to translate the binary message to the corresponding language class, back and forth, which provides setter/getter funcitons
+
+![proxy](./images/protoc.png "proxy server")
+
 ## How to start
 
-### a testing websocket server port: 8765
+### a testing websocket server (serve json response) port: 8765
 
 python3 wsserver.py
+
+### a testing tcp server (serve proto response) port : 8000
+
+> tbd
 
 ### proxysrever (wssclient + httpserver)
 
