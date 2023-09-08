@@ -6,7 +6,7 @@ import json
 import queue
 import _thread as thread
 
-from Core.runAsync import run_async, remoteUri, secretKey
+from Core.utils import run_async, remoteUri, secretKey
 
 def singleton(cls):
     _instance = {}

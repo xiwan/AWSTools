@@ -9,11 +9,12 @@ from flask import Flask, jsonify, has_request_context, copy_current_request_cont
 from flask_script import Manager
 from functools import wraps
 from concurrent.futures import Future, ThreadPoolExecutor
+from google.protobuf.json_format import MessageToJson, MessageToDict
 
 from configparser import ConfigParser
 
 cfg = ConfigParser()
-cfg.read("./env.local.ini")
+cfg.read("./config/env.local.ini")
 
 config = cfg['config']
 routeTable = cfg['route']
@@ -24,6 +25,15 @@ binary = cfg['config']['binary']
 
 logfileName = date.today().strftime('%Y-%m-%d') + "-" +  str(threading.current_thread().ident)
 logging.basicConfig(filename=f"./logs/proxy-{logfileName}.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%M-%Y %H:%M:%S", level=logging.DEBUG)
+
+def singleton(cls):
+    _instance = {}
+
+    def inner():
+        if cls not in _instance:
+            _instance[cls] = cls()
+        return _instance[cls]
+    return inner
 
 def run_async(func):
     @wraps(func)
@@ -60,11 +70,19 @@ def decodeBig(CSID):
 def getbyteLitte(CSID): 
   return CSID.to_bytes(4, byteorder='little')
 
-def singleton(cls):
-    _instance = {}
 
-    def inner():
-        if cls not in _instance:
-            _instance[cls] = cls()
-        return _instance[cls]
-    return inner
+class ProtoKlass:
+    def __init__(self):
+        pass
+
+    def MessageToJson(self, message):
+        return MessageToJson(message)
+
+    def MessageToDict(self, message):
+        return MessageToDict(message)
+    
+    def SerializeToString(self, message):
+        return message.SerializeToString()
+    
+    def ParseFromString(self, message, bin):
+        message.ParseFromString(bin)

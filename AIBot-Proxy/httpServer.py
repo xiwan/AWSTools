@@ -4,7 +4,7 @@ from flask import Flask, request, session, jsonify, has_request_context, copy_cu
 from flask_script import Manager
 from functools import wraps
 from concurrent.futures import Future, ThreadPoolExecutor
-from Core.runAsync import run_async, remoteUri, secretKey, logging
+from Core.utils import run_async, remoteUri, secretKey, logging, ProtoKlass
 from wssClient import WssConnector
 
 app = Flask(__name__)
@@ -30,6 +30,11 @@ def before_reql(*args, **kwargs):
     uid = session.get("sessionid")
     uid = remoteUri
 
+    # print('------')
+    # print(request.headers.get('Host'))
+    # print(request.headers.get('Authorization'))
+    # print(request.headers.get('Content-Type'))
+    # print(request.headers.get('Accept'))
     pass
 
 @app.route('/', methods=['GET', 'POST'])
@@ -70,3 +75,26 @@ async def state():
         code = reqjson['code']
 
     return await ws.FetchSateDictMsg(code)
+
+import progen.python.todolist_pb2 as TodoList
+
+@app.route('/test', methods=['GET', 'POST'])
+@run_async
+async def test():
+    my_list = TodoList.TodoList()
+    my_list.owner_id = 1234
+    my_list.owner_name = "Tim"
+
+    first_item = my_list.todos.add()
+    first_item.state = TodoList.TaskState.Value("TASK_DONE")
+    first_item.task = "Test ProtoBuf for Python"
+    first_item.due_date = "31.10.2019"
+
+    proto = ProtoKlass()
+
+    bin = proto.SerializeToString(my_list)
+    print(bin)
+    my_list2 = TodoList.TodoList()
+    proto.ParseFromString(my_list2, bin)
+    print(my_list2)
+    return proto.MessageToJson(my_list)
