@@ -30,7 +30,6 @@ if __name__ == "__main__":
     parser.add_argument('--mode', type=str, help='mode value: wss server or tcp server', default='wss')
     parser.add_argument('--host', type=str, help='host address: 0.0.0.0 or localhost', required=True, default='localhost')
     parser.add_argument('--port', type=int, help='host port number: 5000', required=True, default='5000')
-
     args = parser.parse_args()
 
     if args.mode == 'wss' or args.mode == 'ws':

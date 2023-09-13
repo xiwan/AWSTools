@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import json
+import argparse
 
 async def echo(websocket, path):
   async for message in websocket:
@@ -44,7 +45,13 @@ def GetPayload(code):
   J = J.encode()
   return J
 
-start_server = websockets.serve(echo, "localhost", 8765)
+if __name__ == '__main__':  
+  parser = argparse.ArgumentParser(description='tcp server command-line options')
+  parser.add_argument('--host', type=str, help='host address: 0.0.0.0 or localhost', default='localhost')
+  parser.add_argument('--port', type=int, help='host port number: 8765', default='8765')
+  args = parser.parse_args()
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+  start_server = websockets.serve(echo, args.host, args.port)
+
+  asyncio.get_event_loop().run_until_complete(start_server)
+  asyncio.get_event_loop().run_forever()
