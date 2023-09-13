@@ -2,7 +2,7 @@
 
 ## Architecture 
 
-![proxy](./images/AIBOT.png "proxy server")
+![proxy](./images/AIBOT-proxy.png "proxy server")
 
 
 the proxy server has 2 purposes:
@@ -12,7 +12,7 @@ the proxy server has 2 purposes:
 
 Moreover, it final implementation depends on the designer's categorization of the Dedicated server APIs, which usually refers to 4 domains: **Init** **State** **Reset** and **Action** , to complete the Reinforcement Learning Architecture
 
-![proxy](./images/ReInforcementLearningChart.png "proxy server")
+![reinforced learning](./images/ReInforcementLearningChart.png "reinforced learning")
 
 ## Protos
 
@@ -22,7 +22,7 @@ Some dedicated server only serve protos, hence I designed a translation from pro
 
 proto is a faster serilization/deserilization method comparing to json/txt format. To use it, a proto extension for schema is needed, and a proto compilier is used to translate the binary message to the corresponding language class, back and forth, which provides setter/getter funcitons
 
-![proxy](./images/protoc.png "proxy server")
+![proto](./images/protoc.png "proto")
 
 ## How to start
 
