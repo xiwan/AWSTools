@@ -32,7 +32,7 @@ python3 wsServer.py [--host localhost --port 8765]
 
 ### a testing tcp server (serve proto response) port : 8000
 
-python3 tcpSrver.py [--host localhost --port 8765]
+python3 tcpSrver.py [--host localhost --port 8000]
 
 ### proxysrever (wssclient + httpserver) serving port 5000
 
@@ -66,9 +66,9 @@ secretKey = benxiwan
 listen = 0.0.0.0
 port = 5000
 # type of wss client payload: 0: str 1: bytes
-binary = 0
+wssdata = 0
 # type of tcp client payload: 0: bytes 1: proto
-proto = 0
+tcpdata = 1
 
 
 [route]
