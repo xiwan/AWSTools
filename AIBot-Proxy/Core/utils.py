@@ -20,6 +20,7 @@ config = cfg['config']
 routeTable = cfg['route']
 
 remoteUri = cfg['config']['remoteUri']
+remoteTcp = cfg['config']['remoteTcp']
 secretKey = cfg['config']['secretKey']
 binary = cfg['config']['binary']
 

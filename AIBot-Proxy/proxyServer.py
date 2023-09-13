@@ -4,29 +4,44 @@ from flask import Flask, request, session, jsonify, has_request_context, copy_cu
 from flask_script import Manager, Server
 from functools import wraps
 from concurrent.futures import Future, ThreadPoolExecutor
-from Core.utils import run_async, remoteUri, secretKey, logging, ProtoKlass
+from Core.utils import run_async, remoteUri, remoteTcp, secretKey, logging, ProtoKlass
 from clients.wssClient import WssConnector
+from clients.tcpClient import TcpConnector
 
 app = Flask(__name__)
 app.secret_key = secretKey
 manager = Manager(app)
 
+mode = None
 uid = None
 ws = None # websocket connector
 ts = None # tcp socket connector
 
 @app.before_request
 def before_reql(*args, **kwargs):
-    global uid, ws
+
+    global uid, ws, ts, mode
     uid = session.get("sessionid")
     if not uid:
         uid = uuid.uuid1()
         session["sessionid"] = uid
 
-    ws = WssConnector()
+    mode = app.config['SERVER_MODE']
 
-    if not ws or not uid:
+    if mode is not None:
+        if mode == "wss" or  mode == "ws":
+            ws = WssConnector()
+            if not ws or not uid:
+                return str(404)
+            
+        if mode == "tcp":
+            print(f"mode : {mode}")
+            ts = TcpConnector()
+            if not ts or not uid:
+                return str(404)
+    else:
         return str(404)
+
     # finalize the global vars
     uid = session.get("sessionid")
     uid = remoteUri
@@ -38,33 +53,36 @@ def before_reql(*args, **kwargs):
     # print(request.headers.get('Accept'))
     pass
 
+async def mainHandler(reqjson):
+    # print(reqjson)
+    if ws is not None:
+        ws.PutInMsg(reqjson)
+        return await ws.FetchMsg()
+    if ts is not None:
+        ts.PutInMsg(reqjson)
+        return await ts.FetchMsg()
+    
+    return None
+
 @app.route('/', methods=['GET', 'POST'])
 @run_async
 async def hello():
-    reqjson = request.get_json() 
-    ws.PutInMsg(reqjson)
-    return await ws.FetchMsg()
+    return await mainHandler(request.get_json())
 
 @app.route('/init', methods=['GET', 'POST'])
 @run_async
 async def init():
-    reqjson = request.get_json() 
-    ws.PutInMsg(reqjson)
-    return await ws.FetchMsg()
+    return await mainHandler(request.get_json())
 
 @app.route('/reset', methods=['GET', 'POST'])
 @run_async
 async def reset():
-    reqjson = request.get_json() 
-    ws.PutInMsg(reqjson)
-    return await ws.FetchMsg()
+    return await mainHandler(request.get_json())
 
 @app.route('/action', methods=['GET', 'POST'])
 @run_async
 async def action():
-    reqjson = request.get_json() 
-    ws.PutInMsg(reqjson)
-    return await ws.FetchMsg()
+    return await mainHandler(request.get_json())
 
 @app.route('/state', methods=['GET', 'POST'])
 @run_async
@@ -79,9 +97,9 @@ async def state():
 
 import progen.python.todolist_pb2 as TodoList
 
-@app.route('/test', methods=['GET', 'POST'])
+@app.route('/protos', methods=['GET', 'POST'])
 @run_async
-async def test():
+async def protos():
     my_list = TodoList.TodoList()
     my_list.owner_id = 1234
     my_list.owner_name = "Tim"

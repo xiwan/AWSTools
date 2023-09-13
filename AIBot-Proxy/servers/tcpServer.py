@@ -40,9 +40,9 @@ if __name__ == '__main__':
         tcp_client_1 , tcp_client_address = tcp_server.accept()
         thd = threading.Thread(target = dispose_client_request, args = (tcp_client_1,tcp_client_address))
 
-        thd.setDaemon(True)
+        #thd.setDaemon(True)
 
-        thd.Start()
+        thd.start()
         pass
 
     tcp_server.close()
