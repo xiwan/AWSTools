@@ -28,11 +28,11 @@ proto is a faster serilization/deserilization method comparing to json/txt forma
 
 ### a testing websocket server (serve json response) port: 8765
 
-python3 ./servers/wsServer.py [--host localhost --port 8765]
+python3 wsServer.py [--host localhost --port 8765]
 
 ### a testing tcp server (serve proto response) port : 8000
 
-python3 ./servers/tcpSrver.py [--host localhost --port 8765]
+python3 tcpSrver.py [--host localhost --port 8765]
 
 ### proxysrever (wssclient + httpserver) serving port 5000
 
@@ -58,6 +58,8 @@ python3 proxy.py --host 0.0.0.0 --port 5000 [--mode tcp]
 [config]
 # ws server location
 remoteUri = ws://localhost:8765
+# tcp server location
+remoteTcp = localhost:8000
 # flask server key
 secretKey = benxiwan
 # flask server listen to 
@@ -65,6 +67,8 @@ listen = 0.0.0.0
 port = 5000
 # type of wss client payload: 0: str 1: bytes
 binary = 0
+# type of tcp client payload: 0: bytes 1: proto
+proto = 0
 
 
 [route]

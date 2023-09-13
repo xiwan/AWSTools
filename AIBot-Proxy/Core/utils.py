@@ -21,7 +21,8 @@ routeTable = cfg['route']
 remoteUri = cfg['config']['remoteUri']
 remoteTcp = cfg['config']['remoteTcp']
 secretKey = cfg['config']['secretKey']
-binary = cfg['config']['binary']
+wssdata = cfg['config']['wssdata']
+tcpdata = cfg['config']['tcpdata']
 
 logfileName = date.today().strftime('%Y-%m-%d') + "-" +  str(threading.current_thread().ident)
 logging.basicConfig(filename=f"./logs/proxy-{logfileName}.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%M-%Y %H:%M:%S", level=logging.DEBUG)

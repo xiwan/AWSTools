@@ -1,24 +1,33 @@
 import socket
 import threading
 import argparse
+import json
 import progen.python.todolist_pb2 as TodoList
 from Core.protoKlass import ProtoKlass
+from datetime import datetime
 
-def example_proto(owner_id):
+def example_proto(task):
+    dt = datetime.now()  
+
     my_list = TodoList.TodoList()
-    my_list.owner_id = owner_id
+    my_list.owner_id = 1234
     my_list.owner_name = "Tim"
 
     first_item = my_list.todos.add()
     first_item.state = TodoList.TaskState.Value("TASK_DONE")
-    first_item.task = "Test ProtoBuf for Python"
-    first_item.due_date = "31.10.2019"
+    first_item.task = task
+    first_item.due_date = dt.strftime( '%Y-%m-%d %H:%M:%S %f')
     proto = ProtoKlass()
     return proto.SerializeToString(my_list)
 
 
 def proto_handler(recv_data):
-    return example_proto(77777)
+    proto = ProtoKlass()
+    jsonstr = proto.RevHandler(recv_data)
+    print("recv_data:", jsonstr)
+    jsondata = json.loads(jsonstr)
+    print(jsondata['todos'][0]['task'])
+    return example_proto(jsondata['todos'][0]['task'])
 
 def echo_handler(recv_data):
     msg = recv_data.decode("utf-8")

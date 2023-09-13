@@ -10,7 +10,7 @@ from Core.protoKlass import ProtoKlass
 
 remoteTcp = config['remoteTcp']
 secretKey = config['secretKey']
-binary = config['binary']
+tcpdata = int(config['tcpdata'])
 
 @singleton
 class TcpConnector(object):
@@ -63,8 +63,14 @@ class TcpConnector(object):
         while True:
             try:
                 msg = self.inQ.get()
-                logging.info(f"### Run ### {binary} format: {msg}")
-                self.SendByte(str(msg).encode("utf-8"))
+                logging.info(f"### OnOpen {tcpdata} format: {msg}")
+                if tcpdata == 1:
+                    proto = ProtoKlass()
+                    send_data = proto.SendHandler(str(msg))
+                    self.SendByte(send_data)
+                else:
+                    self.SendByte(str(msg).encode('utf-8'))
+
                 self.inQ.task_done()
             except Exception as e:
                 logging.info(f"### TcpConnector OnOpen ### socket.error: {e}")
@@ -83,11 +89,13 @@ class TcpConnector(object):
                     return
                 if isinstance(revcdata, bytes):
                     # msg = revcdata.decode(encoding='utf-8')
-               
-                    proto = ProtoKlass()
-                    proto2json = proto.Handler(revcdata)
-                    self.PutOutMsg(proto2json)
-                    logging.info(f"### OnMessage bytes ###: {proto2json}")
+                    if tcpdata == 1:
+                        proto = ProtoKlass()
+                        proto2json = proto.RevHandler(revcdata)
+                        self.PutOutMsg(proto2json)
+                        logging.info(f"### OnMessage bytes ###: {proto2json}")
+                    else:
+                        self.PutOutMsg(revcdata.decode("utf-8"))
                 elif isinstance(revcdata, str):
                     self.PutOutMsg(revcdata)
                     logging.info(f"### OnMessage str ###: {revcdata}")
@@ -129,7 +137,7 @@ class TcpConnector(object):
 
 
     def SendByte(self, send_data):
-        print(f"send_data: {send_data}, {len(send_data)}")
+        # print(f"send_data: {send_data}, {len(send_data)}")
         sendlen = 0
         while sendlen < len(send_data):
             successlen = self.tcp_socket.send(send_data[sendlen:])

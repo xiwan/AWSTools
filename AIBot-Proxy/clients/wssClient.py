@@ -9,7 +9,7 @@ from Core.utils import run_async, decodeLittle, decodeBig, getbyteLitte, singlet
 
 remoteUri = config['remoteUri']
 secretKey = config['secretKey']
-binary = config['binary']
+wssdata = int(config['wssdata'])
 
 @singleton
 class WssConnector(object):
@@ -59,8 +59,8 @@ class WssConnector(object):
     def Run(self, *args):
         while True:
             msg = self.inQ.get()
-            logging.info(f"### Run ### {binary} format: {msg}")
-            if binary == 1:
+            logging.info(f"### Run ### {wssdata} format: {msg}")
+            if wssdata == 1:
                 self.SendByte(msg) 
             else:
                 self.SendJson(msg)
