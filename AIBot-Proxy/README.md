@@ -8,7 +8,7 @@
 the proxy server has 2 purposes:
 
 + serving as a http server for sagemaker endpoint
-+ playing as wss client for custom protocol adaptation
++ playing as wss/tcp client for custom protocol adaptation
 
 Moreover, it final implementation depends on the designer's categorization of the Dedicated server APIs, which usually refers to 4 domains: **Init** **State** **Reset** and **Action** , to complete the Reinforcement Learning Architecture
 
@@ -34,11 +34,11 @@ python3 ./servers/wsserver.py
 
 > tbd
 
-### proxysrever (wssclient + httpserver)
+### proxysrever (wssclient + httpserver) serving port 5000
 
 python3 proxy.py --host 0.0.0.0 --port 5000 --mode wss
 
-### proxysrever (tcpclient + httpserver)
+### proxysrever (tcpclient + httpserver) serving port 5000
 
 python3 proxy.py --host 0.0.0.0 --port 5000 --mode tcp
 
@@ -52,7 +52,7 @@ python3 proxy.py --host 0.0.0.0 --port 5000 --mode tcp
 
 **state**: you can pass a json {"code": 10117} to get targeting queue msg, if code = 0, it will return last successful state msg
 
-### how to config
+## how to config
 
 ```
 [config]
