@@ -51,25 +51,3 @@ class Handler:
             # i += 1
 
         logging.info('async_recv end')
-
-
-# 创建 Thread 的子类
-class CustomThread(threading.Thread):
-    def __init__(self, func, args):
-        '''
-        :param func: 可调用的对象
-        :param args: 可调用对象的参数
-        '''
-        threading.Thread.__init__(self, target=func, args=args)
-        self.func = func
-        self.args = args
-        self.result = None
-
-    def run(self):
-        # print(self.func)
-        # print(*self.args)
-        self.result = self.func(*self.args)
-        print(self.result)
-
-    def getResult(self):
-        return self.result

@@ -4,13 +4,9 @@ import threading
 import sys
 import argparse
 
-from wsHandler import CustomThread
-from httpServer import app, Server, run_async, remoteUri, logging
-from wssClient import WssConnector
-
-# @manager.command
-# def i_say(arg, num):
-#     print(arg * int(num))
+from Core.utils import CustomThread
+from proxyServer import app, Server, run_async, remoteUri, logging
+from clients.wssClient import WssConnector
 
 def wssConnector(host, port):
     s = time.time()

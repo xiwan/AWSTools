@@ -3,9 +3,9 @@ import _thread as thread
 import time
 import json
 import queue
+import asyncio
 
 from Core.utils import run_async, decodeLittle, decodeBig, getbyteLitte, singleton, logging, config, routeTable
-import asyncio
 
 remoteUri = config['remoteUri']
 secretKey = config['secretKey']

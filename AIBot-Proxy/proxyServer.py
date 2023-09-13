@@ -5,7 +5,7 @@ from flask_script import Manager, Server
 from functools import wraps
 from concurrent.futures import Future, ThreadPoolExecutor
 from Core.utils import run_async, remoteUri, secretKey, logging, ProtoKlass
-from wssClient import WssConnector
+from clients.wssClient import WssConnector
 
 app = Flask(__name__)
 app.secret_key = secretKey
