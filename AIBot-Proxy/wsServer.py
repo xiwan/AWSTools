@@ -10,6 +10,7 @@ async def echo(websocket, path):
     print(f"Send message: {message}")
     # await websocket.send(f"{message}")
     # print(f"Send message: {message}")
+    pass
 
 async def testSend(websocket, path):
   message = "test"
@@ -33,6 +34,7 @@ async def testSend(websocket, path):
   print(f"Send message binary: {message5}")
 
   await echo(websocket, path)
+  pass
 
 def Getbyte(CSID): 
   return CSID.to_bytes(4, byteorder='little')

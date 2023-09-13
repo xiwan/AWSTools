@@ -6,6 +6,7 @@ import queue
 import asyncio
 
 from Core.utils import run_async, decodeLittle, decodeBig, getbyteLitte, singleton, logging, config, routeTable
+from Core.protoKlass import ProtoKlass
 
 remoteTcp = config['remoteTcp']
 secretKey = config['secretKey']
@@ -58,21 +59,44 @@ class TcpConnector(object):
             return msg
 
     def OnOpen(self):
+        failed_try = 0
         while True:
-            msg = self.inQ.get()
-            logging.info(f"### Run ### {binary} format: {msg}")
-            self.SendByte(str(msg).encode("utf-8"))
-            self.inQ.task_done()
+            try:
+                msg = self.inQ.get()
+                logging.info(f"### Run ### {binary} format: {msg}")
+                self.SendByte(str(msg).encode("utf-8"))
+                self.inQ.task_done()
+            except Exception as e:
+                logging.info(f"### TcpConnector OnOpen ### socket.error: {e}")
+                failed_try += 1
+                if failed_try > 3:
+                    return
+                time.sleep(1)
 
     def OnMessage(self):
-        revcdata = self.tcp_socket.recv(1024)
-        if isinstance(revcdata, bytes):
-            msg = revcdata.decode(encoding='utf-8')
-            self.PutOutMsg(msg)
-            logging.info(f"### OnMessage bytes ###: {msg}")
-        elif isinstance(msg, str):
-            self.PutOutMsg(msg)
-            logging.info(f"### OnMessage str ###: {msg}")
+        failed_try = 0
+        while True:
+            try:
+                revcdata = self.tcp_socket.recv(1024)
+                if len(revcdata) == 0:
+                    self.Close()
+                    return
+                if isinstance(revcdata, bytes):
+                    # msg = revcdata.decode(encoding='utf-8')
+               
+                    proto = ProtoKlass()
+                    proto2json = proto.Handler(revcdata)
+                    self.PutOutMsg(proto2json)
+                    logging.info(f"### OnMessage bytes ###: {proto2json}")
+                elif isinstance(revcdata, str):
+                    self.PutOutMsg(revcdata)
+                    logging.info(f"### OnMessage str ###: {revcdata}")
+            except Exception as e:
+                logging.info(f"### TcpConnector OnMessage ### socket.error: {e}")
+                failed_try += 1
+                if failed_try > 3:
+                    return
+                time.sleep(1)
 
     def Connect(self, server_addr, on_open=None, on_message=None, on_error=None, on_close=None):
         failed_try = 0
@@ -84,8 +108,8 @@ class TcpConnector(object):
                 self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.tcp_socket.connect(self.server_addr)
                 break
-            except socket.error as e:
-                logging.info(f"### WssConnector Connect ### socket.error: {e}")
+            except Exception as e:
+                logging.info(f"### TcpConnector Connect ### socket.error: {e}")
                 failed_try += 1
                 if failed_try > 3:
                     return
@@ -98,10 +122,10 @@ class TcpConnector(object):
         print("client TCP receive buffer size is %d" %s_receive_buffer_size)
 
         if on_open is not None:
-            on_open()
-        
+            thread.start_new_thread(on_open, ())
+
         if on_message is not None:
-            on_message()
+            thread.start_new_thread(on_message, ())
 
 
     def SendByte(self, send_data):
@@ -117,23 +141,7 @@ class TcpConnector(object):
     @run_async
     async def OnConnect(self, remoteTcp):
         self.remoteTcp = remoteTcp
-        self.Connect(remoteTcp, self.OnOpen, self.OnMessage)
+        self.Connect(remoteTcp, on_open = self.OnOpen, on_message = self.OnMessage)
         logging.info(f"### WssConnector OnConnect ### remoteUri: {remoteTcp}")
         pass
 
-    
-
-
-# # 1.创建socket
-# tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# # 2. 链接服务器
-# server_addr = ("34.229.191.120", 7788)
-# tcp_socket.connect(server_addr)
-
-# # 3. 发送数据
-# send_data = input("请输入要发送的数据：")
-# tcp_socket.send(send_data.encode("gbk"))
-
-# # 4. 关闭套接字
-# tcp_socket.close()

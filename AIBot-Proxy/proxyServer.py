@@ -1,10 +1,11 @@
 import uuid
+import progen.python.todolist_pb2 as TodoList
 
 from flask import Flask, request, session, jsonify, has_request_context, copy_current_request_context
-from flask_script import Manager, Server
+from flask_script import Manager
 from functools import wraps
-from concurrent.futures import Future, ThreadPoolExecutor
-from Core.utils import run_async, remoteUri, remoteTcp, secretKey, logging, ProtoKlass
+from Core.utils import run_async, remoteUri, remoteTcp, secretKey, logging
+from Core.protoKlass import ProtoKlass
 from clients.wssClient import WssConnector
 from clients.tcpClient import TcpConnector
 
@@ -27,7 +28,6 @@ def before_reql(*args, **kwargs):
         session["sessionid"] = uid
 
     mode = app.config['SERVER_MODE']
-
     if mode is not None:
         if mode == "wss" or  mode == "ws":
             ws = WssConnector()
@@ -35,7 +35,6 @@ def before_reql(*args, **kwargs):
                 return str(404)
             
         if mode == "tcp":
-            print(f"mode : {mode}")
             ts = TcpConnector()
             if not ts or not uid:
                 return str(404)
@@ -87,6 +86,9 @@ async def action():
 @app.route('/state', methods=['GET', 'POST'])
 @run_async
 async def state():
+    if ws is None:
+        return None
+    
     reqjson = request.get_json() 
     # ws.PutInMsg(reqjson)
     code = 0
@@ -95,14 +97,12 @@ async def state():
 
     return await ws.FetchSateDictMsg(code)
 
-import progen.python.todolist_pb2 as TodoList
-
 @app.route('/protos', methods=['GET', 'POST'])
 @run_async
 async def protos():
     my_list = TodoList.TodoList()
-    my_list.owner_id = 1234
-    my_list.owner_name = "Tim"
+    my_list.owner_id = 77777
+    my_list.owner_name = "Benxiwan"
 
     first_item = my_list.todos.add()
     first_item.state = TodoList.TaskState.Value("TASK_DONE")
@@ -113,6 +113,8 @@ async def protos():
 
     bin = proto.SerializeToString(my_list)
     print(bin)
+
+    print("==========")
     my_list2 = TodoList.TodoList()
     proto.ParseFromString(my_list2, bin)
     print(my_list2)

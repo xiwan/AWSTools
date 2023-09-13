@@ -9,7 +9,6 @@ from flask import Flask, jsonify, has_request_context, copy_current_request_cont
 from flask_script import Manager
 from functools import wraps
 from concurrent.futures import Future, ThreadPoolExecutor
-from google.protobuf.json_format import MessageToJson, MessageToDict
 
 from configparser import ConfigParser
 
@@ -70,23 +69,6 @@ def decodeBig(CSID):
 
 def getbyteLitte(CSID): 
   return CSID.to_bytes(4, byteorder='little')
-
-
-class ProtoKlass:
-    def __init__(self):
-        pass
-
-    def MessageToJson(self, message):
-        return MessageToJson(message)
-
-    def MessageToDict(self, message):
-        return MessageToDict(message)
-    
-    def SerializeToString(self, message):
-        return message.SerializeToString()
-    
-    def ParseFromString(self, message, bin):
-        message.ParseFromString(bin)
 
 # 创建 Thread 的子类
 class CustomThread(threading.Thread):
