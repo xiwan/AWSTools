@@ -1,7 +1,7 @@
 import uuid
 
 from flask import Flask, request, session, jsonify, has_request_context, copy_current_request_context
-from flask_script import Manager
+from flask_script import Manager, Server
 from functools import wraps
 from concurrent.futures import Future, ThreadPoolExecutor
 from Core.utils import run_async, remoteUri, secretKey, logging, ProtoKlass
@@ -12,7 +12,8 @@ app.secret_key = secretKey
 manager = Manager(app)
 
 uid = None
-ws = None
+ws = None # websocket connector
+ts = None # tcp socket connector
 
 @app.before_request
 def before_reql(*args, **kwargs):

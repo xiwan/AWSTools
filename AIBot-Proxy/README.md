@@ -28,7 +28,7 @@ proto is a faster serilization/deserilization method comparing to json/txt forma
 
 ### a testing websocket server (serve json response) port: 8765
 
-python3 wsserver.py
+python3 ./servers/wsserver.py
 
 ### a testing tcp server (serve proto response) port : 8000
 
@@ -36,7 +36,11 @@ python3 wsserver.py
 
 ### proxysrever (wssclient + httpserver)
 
-python3 proxy.py runserver -h 0.0.0.0 -p 5000
+python3 proxy.py --host 0.0.0.0 --port 5000 --mode wss
+
+### proxysrever (tcpclient + httpserver)
+
+python3 proxy.py --host 0.0.0.0 --port 5000 --mode tcp
 
 ### curl following apis
 
