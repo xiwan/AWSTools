@@ -5,6 +5,7 @@ import os
 import sys
 import argparse
 import time
+from pprint import pprint
 
 def main(region, identity_store_id, user_name, group_name):
     sso_identitystore = boto3.client('identitystore', region_name=region)
@@ -96,8 +97,8 @@ def main(region, identity_store_id, user_name, group_name):
                         permissiondata = sso_admin_client.describe_permission_set(
                             InstanceArn=instance['InstanceArn'], 
                             PermissionSetArn=permissionset)
-                        print(f'{assignment["PrincipalType"]} {assignment["PrincipalId"]}')
-                        print(f'{permissiondata["PermissionSet"]}')
+                        print(f'======== {assignment["PrincipalType"]} {assignment["PrincipalId"]} =========')
+                        pprint(permissiondata["PermissionSet"], indent=2)
                         pass
                 pass
             pass
