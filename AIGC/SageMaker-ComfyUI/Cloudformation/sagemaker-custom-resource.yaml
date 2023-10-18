@@ -57,11 +57,23 @@ Resources:
           Principal: 
             Service: 
               - "sagemaker.amazonaws.com"
+              - "bedrock.amazonaws.com"
           Action: 
           - "sts:AssumeRole"
       Path: "/"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - bedrock:*
+                Effect: Allow
+                Resource:
+                  - "*"
+          PolicyName: bedrockFullAccess
+
   NotebookInstance:
     Type: AWS::SageMaker::NotebookInstance
     Properties:
