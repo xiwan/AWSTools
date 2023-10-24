@@ -255,7 +255,7 @@ def main():
 
 def usage():
 
-    print("copysg.py [-h] [--profile=alt_profile] [--shell] [--vpc=vpcid] [-src=source_region] [--dest=dest_region]", end=" ")
+    print("aws_sg_migrate.py [-h] [--profile=alt_profile] [--shell] [--vpc=vpcid] [-src=source_region] [--dest=dest_region]", end=" ")
     print("sg_id")
     print("    -h - help")
     print("    --profile (or -p) - use alternate aws cli profile")
