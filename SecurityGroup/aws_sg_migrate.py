@@ -247,9 +247,12 @@ def main():
         print("ERROR: You must give a security group id")
         usage()
         sys.exit(1)
-    sgid = args[0]
+    sgids = args[0]
+    sgid_arr = sgids.split(",")
 
-    makesg(profile, sgid, vpcid, source, destination, shell)
+    for sgid in sgid_arr:
+        print(sgid)
+        makesg(profile, sgid, vpcid, source, destination, shell)
 
 ############################## USAGE #########################################
 
