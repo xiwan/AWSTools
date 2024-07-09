@@ -1,0 +1,1943 @@
+﻿syntax = "proto3";
+package Core.Engine.Network;
+
+enum BattleProtoIds {
+  Invalid_Notify = 0;
+  PingPong_Req = 1; // tcp心跳
+  PingPong_Rsp = 2;
+
+
+  Connect_Req = 4; // 客户端向服务器建立"连接"
+  Connect_Rsp = 5;
+
+  PlayerJoin_Req = 6;
+  PlayerJoin_Rsp = 7;
+
+  GameTime_Notify = 8;
+
+  SelectLord_Req = 9;
+  SelectLord_Rsp = 10;
+
+  GameState_Notify = 11;
+
+  Entity_Notify = 12;
+  Resource_Notify = 13;
+
+  Bag_Req = 14;
+  Bag_Rsp = 15;
+
+  Hp_Notify = 16;
+  Team_Notify = 17;
+  ModifyBattleUnit_Req = 18;
+  ModifyBattleUnit_Rsp = 19;
+
+  Damage_Req = 20;
+  Damage_Rsp = 21;  //暂时空缺
+
+  GameOver_Notify = 22;
+  PendingItem_Req = 23;
+  PendingItem_Rsp = 24;
+
+  BattlePlayerCommand_Req = 25;
+  BattlePlayerCommand_Rsp = 26;  //暂时空缺
+
+  ManageCastle_Req = 27;
+  ManageCastle_Rsp = 28;  //暂时空缺
+
+  Castle_Notify = 29;
+  CastleOwner_Notify = 30;
+  Lord_Notify = 31;
+  Physics_Notify = 32;
+
+  Squad_Notify = 33;
+  SquadOwner_Notify = 34;
+  Pawn_Notify = 35;
+  PawnsOwner_Notify = 36;
+
+  EditSquad_Req = 37;
+  EditSquad_Rsp = 38;  //缺失
+
+  OrderSquad_Req = 39;
+  OrderSquad_Rsp = 40;  //缺失
+
+  Ap_Notify = 41;
+  Dp_Notify = 42;
+  Path_Notify = 43;
+  Buff_Notify = 44;
+
+  KcpConnect_Req = 45;
+  KcpConnect_Rsp = 46;
+
+  ScoutResult_Notify = 47;
+
+  SkillResult_Notify = 48;
+  SkillSync_Req = 49;
+  SkillSync_Rsp = 50;
+
+  PlayerAttributeChange_Req = 51;
+  PlayerAttributeChange_Rsp = 52;
+
+  TeamHomeChange_Notify = 53;
+
+  ShowMessage_Notify = 59;
+
+  Defeat_Notify = 61;
+
+  Disconnect_Req = 62;
+  Disconnect_Rsp = 63;
+
+  MoveCrystal_Req = 64;
+  MoveCrystal_Rsp = 65;
+
+  EnterGame_Notify = 67;
+
+  BattleMapControl_Req = 68;
+  BattleMapControl_Rsp = 69;
+
+  BattleUnit_Notify = 70;
+
+  BattleMap_Notify = 71;
+  BattleUnitState_Notify = 72;
+  BattleMapTimer_Notify = 73;
+  BattleMapPlayer_Notify = 74;
+  BattleUnitAttribute_Notify = 75;
+  Player_Notify = 76;
+
+  BattleMapSetPlayerInfo_Req = 78;
+  BattleMapSetPlayerInfo_Rsp = 79;  //缺失 gm？
+
+  Ambush_Notify = 80;
+
+  NormalChat_Req = 81;
+  NormalChat_Rsp = 82;
+
+  ParamChat_Req = 83;
+  ParamChat_Rsp = 84;
+
+  PlayerCommand_Notify = 85;
+  JoinBattle_Notify = 86;
+  Territory_Notify = 90;
+  GridProp_Notify = 91;
+  GmCommand_Req = 92;
+  VisionInfo_Notify = 93;
+  TeamShareEffectEntity_Notify = 94;
+  PlayerRevive_Notify = 95;
+  SelectLord_Notify = 96;
+  CrystalRing_Notify = 97;
+  BattleMapFleeFinish_Notify = 98;
+  BattleBuff_Notify = 99;
+  TeamTech_Notify = 100;
+
+  EnemyPlayerPawnInfo_Notify = 102;
+  BattleMapResult_Notify = 103;
+  BattleMapEvent_Notify = 104;
+  KillBoss_Notify = 105;
+  TeleportInfo_Notify = 106;
+  ReconnectInfo_Notify = 107;
+  ResetGridSelect_Notify = 108;
+  BattleDmg_Notify = 109;
+  AttackCastle_Notify = 110;
+  MoveCrystal_Notify = 111;
+  Disconnect_Notify = 112;
+  Bag_Notify = 113;
+  PlayerAttributeChange_Notify = 114;
+  SkillSync_Notify = 115;
+  PendingItem_Notify = 116;
+  PlayerJoin_Notify = 117;
+  ChooseLord_Notify = 118;
+  NormalChat_Notify = 119;
+  ParamChat_Notify = 120;
+  GmCommand_Rsp = 121;
+  Surrender_Req = 122;
+  Surrender_Rsp = 123;
+  Surrender_Notify = 124;
+  SurrenderSuccess_Notify = 125;
+  PlayerSurrender_Notify = 126;
+  BattleInstantSkill_Notify = 127;
+  KDA_Notify = 128;
+  Reward_Notify = 129;
+  BattleUnitMove_Notify = 130;
+  AddBattleUnits_Req = 131;
+  SimulateBattleMap_Req = 132;
+  CastleWinnerScore_Notify = 133;
+  TeamWinnerScore_Notify = 134;
+  MoveCrystalAnim_Notify = 135;
+  HexTechChoice_Req = 136;
+  HexTechChoice_Rsp = 137;
+  HexTechChoiceSelect_Req = 138;
+  HexTechChoiceSelect_Rsp = 139;
+  BattleMapFledInfo_Notify = 140;
+  Field_Notify = 141;
+  SelectLordCoreCard_Req = 142;
+  SelectLordCoreCard_Rsp = 143;
+  BattleHistoryInfo_Notify = 144;
+  SelectPlayerSkill_Req = 145;
+  SelectPlayerSkill_Rsp = 146;
+  BattleCreationAdd_Notify = 147;
+  SelectPlayerFormation_Req = 148;
+  SelectPlayerFormation_Rsp = 149;
+  Loading_Notify = 150;
+  Anim_Notify = 151;
+  SkillRemove_Notify = 152;
+  SelectLordFormation_Req = 153;
+  SelectLordFormation_Rsp = 154;
+  FlyCannonUse_Req = 155;
+  FlyCannonUse_Rsp = 156;
+  GunCarrierShellCastle_Notify = 157;
+  FlyCannonUseFinish_Notify = 158;
+  PlayerVisState_Req = 159;
+  PlayerVisState_Rsp = 160;
+  PlayerVisState_Notify = 161;
+  BattleSkill_Notify = 162;
+  SpawnerSync_Notify = 163;
+  PlayerMoveAttack_Req = 164;
+  PlayerMoveAttack_Rsp = 165;
+  CardLevelUp_Notify = 166;
+  TutorialCommand_Req = 167;
+  SkillPrepare_Req = 168;
+  SkillPrepare_Rsp = 169;
+  SkillPrepare_Notify = 170;
+
+  Test_Req = 9998;
+  Test_Rsp = 9999;
+} //
+// WinnerScore_Notify = 101; // 老版战略分协议, 策划说先注释
+
+message MsgGmCommandRsp{
+  string info = 1;
+}
+
+message MsgMoveCrystalNotify{
+  MoveCrystalInfo info = 1;
+}
+
+message MoveCrystalInfo{
+  int32 newPosition = 1;
+  repeated uint64 agreeList = 2;
+  repeated uint64 rejectList = 3;
+  int64 startTick = 4;
+}
+
+message MsgDisconnectRsp{
+}
+
+message MsgMoveCrystalAnimNotify{
+  uint64 oldCrystalId = 1;
+  uint64 newCrystalId = 2;
+}
+
+message MsgCastleWinnerScoreNotify{
+  repeated CommonWinnerScoreItem datas = 1;
+}
+
+message CommonWinnerScoreItem{
+  uint64 entityId = 1;
+  int32 score = 2;
+}
+
+message MsgTeamWinnerScoreNotify{
+  repeated CommonWinnerScoreItem datas = 1;
+}
+
+message MsgKDANotify{
+  repeated KDAValue kda = 1;
+}
+
+enum KDA{
+  K = 0;
+  D = 1;
+  A = 2;
+  C = 3;
+}
+
+message KDAValue{
+  KDA key = 1;
+  int32 val = 2;
+  uint64 entityId = 3;
+}
+
+message MsgResetGridSelectNotify{
+  PathInfo pathInfo = 1;
+}
+
+message MsgPlayerMoveAttackReq{
+  repeated int32 path = 1;
+  int32 toGridIdx = 2;
+}
+
+message MsgPlayerMoveAttackRsp{
+  
+}
+
+message TeamTechInfo{
+  uint64 entityId = 1;
+  int32 lordLevel = 2;
+  repeated int32 hexTech = 3;
+  repeated int32 pendingLevel = 4;
+  int64 autoPickTick = 5;
+  bool banFlee = 6;
+  int64 startPickTick = 7;
+  int32 restRefreshCount = 8;
+}
+
+message MsgTeamTechNotify{
+  TeamTechInfo teamTechInfo = 1;
+}
+
+message MsgFlyCannonUseReq{
+  uint64 entityId = 2;
+  uint64 flyCannon = 3;
+  int32 gridIdx = 4;
+}
+
+message MsgFlyCannonUseRsp{
+}
+
+message MsgFlyCannonUseFinishNotify{
+  uint64 entityId = 1;
+  uint64 cannonCastleId = 2;
+}
+
+message MsgHexTechChoiceReq{
+  uint64 entityId = 2;
+  int32 level = 3;
+  bool isRepick = 4;
+}
+
+message MsgHexTechChoiceRsp{
+  int32 level = 2;
+  repeated int32 hexTech = 3;
+}
+
+message MsgHexTechChoiceSelectReq{
+  uint64 entityId = 2;
+  int32 level = 3;
+  int32 hexTech = 4;
+}
+
+message MsgHexTechChoiceSelectRsp{
+  int32 level = 2;
+}
+
+enum ETeam{
+  Team_None = 0;
+  Team1 = 1;
+  Team2 = 2;
+  Team3 = 3;
+  Team4 = 4;
+  Max = 5;
+}
+
+message MsgTeleportInfoNotify{
+  uint64 entityId = 1;
+  int32 startGridIdx = 2;
+  int32 endGridIdx = 3;
+  TeleportState state = 4;
+  TeleportType type = 5;
+  uint64 facilityId = 6;
+}
+
+enum TeleportState{
+  TpState_None = 0;
+  Start = 1;
+  Break = 2;
+  Finish = 3;
+}
+
+enum TeleportType{
+  TpType_None = 0;
+  WithLoading = 1;
+  OneWay = 2;
+  FlyCannonTeleport = 3;
+}
+
+message MsgEnemyPlayerPawnInfoNotify{
+  repeated EnemyPlayerPawnInfo infos = 1;
+}
+
+message EnemyPlayerPawnInfo{
+  uint64 entityId = 1;
+  int64 recordTimeTicks = 2;
+  repeated uint32 pawnDataIds = 3;
+}
+
+message CrystalRingInfo{
+  uint64 entityId = 1;
+  int32 maxRing = 2;
+}
+
+message MsgCrystalRingNotify{
+  CrystalRingInfo ringInfo = 1;
+}
+
+enum VisionType{
+  BaseScout = 0;
+  BaseHide = 1;
+  GrassHide = 2;
+  DarkWandererHide = 3;
+  AmbushHide = 4;
+  StealthUmbrellaHide = 5;
+}
+
+message MsgGunCarrierShellCastleNotify{
+  uint64 entityId = 1;
+  uint64 castleId = 2;
+}
+
+message MsgPlayerReviveNotify{
+  uint64 entityId = 1;
+  int64 revivalTime = 2;
+  int64 buySquadCdEndTime = 3;
+}
+
+message MsgVisionInfoNotify{
+  uint64 entityId = 1;
+  repeated VisionInfo visionInfos = 2;
+}
+
+message VisionInfo{
+  repeated float unitDistance = 1;
+  repeated int32 level = 2;
+  bool isRemove = 3;
+  bool isScout = 4;
+  VisionType visionType = 5;
+}
+
+enum TeamShareEffectEntityType{
+  RallyingFlag = 0;
+}
+
+message TeamShareEffectEntityInfo{
+  TeamShareEffectEntityType eType = 1;
+  uint64 entityId = 2;
+  bool isRemove = 3;
+  repeated float effectParams = 4;
+}
+
+message MsgTeamShareEffectEntityNotify{
+  ETeam teamId = 1;
+  repeated TeamShareEffectEntityInfo infos = 2;
+}
+
+enum ETipMsgType{
+  Big = 0;
+  Tiny_AtPos = 1;
+  Tiny_OnSquadHud = 2;
+}
+
+enum EntityState{
+  EntityState_None = 0;
+  Normal = 1;
+  Fighting = 2;
+  Dead = 3;
+  NeedSetOnMap = 4;
+  Loading = 5; // 读条
+  Ambush = 6;
+  Fly = 7;
+  CannotFight = 8;
+  Destroy = 9;
+  SprintHead = 10; // 霓冲刺车头
+  SprintFollower = 11; // 霓冲刺带人
+  Garrison = 12; //驻扎
+}
+
+message MsgTerritoryNotify{
+  int32 gridIdx = 2;
+  ETeam teamId = 3;
+}
+
+message MsgPingPongReq {
+
+}
+
+message MsgPingPongRsp {
+
+}
+
+message MsgConnectReq {
+  string battleId = 1;   //新版连接 用battle 来定位哪一场战斗!!
+  string address = 2;   //废弃 客户端不需要告知ip
+  int32 port = 3;    //废弃 客户端不需要告知port
+  bool onlyTcp = 4;
+  string connectId = 5;  //玩家id的 tostring
+  string token = 6;   //新版连接用token 确保玩家是本人
+  bool isReconnect = 7;  //断线重连标志 默认false
+
+}
+
+message MsgConnectRsp {
+  int64 token = 2;
+  uint32 conv = 3;
+  string address = 4;
+  int32 port = 5;
+  int32 clientId = 6;
+}
+
+enum PlayerState{
+  DisConnect = 0;
+  Connected = 1;
+  Loaded = 2;
+  Ready = 3;
+}
+
+message MsgPlayerJoinReq {
+  PlayerState state = 2;
+}
+
+message MsgPlayerJoinRsp {
+}
+
+message MsgPlayerJoinNotify{
+  string battleUniqueId = 1;
+  uint64 playerEntityId = 2;
+  ETeam teamId = 3;
+  bool isCaptain = 4;
+  string playerName = 5;
+  int32 playerId = 6;
+}
+
+message MsgGameTimeNotify {
+  int64 serverTimeTicks = 1;
+}
+
+message MsgSelectLordReq {
+  int32 selectId = 2;
+  int32 lockFlag = 3;
+  int32 indexId = 4;
+  int32 commandCount = 5;
+}
+
+message MsgSelectLordRsp {
+}
+
+message MsgSelectLordCoreCardReq{
+  int32 indexId = 1;
+  int32 commandCount = 2;
+}
+
+message MsgSelectLordCoreCardRsp{
+
+}
+
+message MsgSelectPlayerSkillReq{
+  uint32 skillId = 1;
+  int32 commandCount = 2;
+}
+
+message MsgSelectPlayerSkillRsp{
+
+}
+
+message MsgSelectPlayerFormationReq{
+  uint32 formationId = 1;
+  int32 commandCount = 2;
+}
+
+message MsgSelectPlayerFormationRsp{
+
+}
+
+message MsgChooseLordNotify{
+  repeated int32 lordArray = 2;
+  int64 endSelectLordTime = 3;
+}
+
+message LordPawnInfo{
+  uint32 pawnId = 1;
+  int32 solt = 2;
+}
+
+message MsgSelectLordNotify{
+  uint64 playerEntityId = 1;
+  int32 lordId = 2;
+  int32 skinId = 3;
+  bool locked = 4;
+  int32 coreCardIndexId = 5;
+  uint32 playerSkillId = 6;
+  repeated LordPawnInfo initFormation = 7;
+}
+
+message EntityChange {
+  bool isAdd = 1;
+  uint64 entityId = 2;
+  int32 entityType = 3;
+}
+
+message MsgEntityNotify {
+  repeated EntityChange changeList = 2;
+}
+
+message MsgGameStateNotify {
+  int64 stateStartTicks = 1;
+  int32 state = 2;
+}
+
+message ResourceInfo{
+  uint64 entityId = 1;
+  int32 coin = 2;
+  int32 food = 3;
+  int32 cost = 4;
+  int32 coinGain = 5;
+  int32 foodGain = 6;
+  int32 accCoin = 7;
+}
+
+message MsgResourceNotify {
+  ResourceInfo resourceInfo = 1;
+}
+
+message BagItemData{
+  uint32 dataId = 1;
+  int32 count = 2;
+  uint64 entityId = 3;
+}
+message BagInfo{
+  uint64 entityId = 1;
+  repeated BagItemData items = 2;
+}
+message MsgBagRsp{
+}
+
+message MsgBagNotify{
+  BagInfo bagInfo = 1;
+}
+
+enum BagCommand
+{
+  Item_Sell = 0;  //卖道具 目前是只有 英雄和碎片
+  Pawn_Sell = 1;  //卖 英雄及其碎片
+}
+
+message MsgBagReq {
+  uint32 dataId = 2;
+  int32 count = 3;
+  uint64 entityId = 4;
+  int32 commandCount = 5;
+  BagCommand command = 6;
+}
+
+message HpInfo{
+  uint64 entityId = 1;
+  float hp = 2;
+  float maxHp = 3;
+}
+message MsgHpNotify {
+  HpInfo hpInfo = 1;
+}
+
+message TeamInfo{
+  uint64 entityId = 1;
+  ETeam teamId = 2;
+  bool isAlive = 3;
+  repeated uint64 teamMember = 4;
+  int32 homeIndex = 5;
+  uint64 homeCrystalId = 6;
+}
+
+message MsgTeamNotify{
+  repeated TeamInfo teamInfos = 1;
+}
+
+message MsgTeamHomeChangeNotify{
+  uint64 entityId = 1;
+  int32 homeGridIdx = 2;
+  uint64 castleId = 3;
+}
+
+message MsgGameOverNotify{
+  repeated ETeam rankedTeams = 1;
+}
+
+enum PendingItemCommand{
+  Item_Buy = 0;
+  Item_Add = 1;
+  Item_Refresh = 2;
+  Quick_Buy = 3;
+}
+
+message PendingItemData{
+  int32 index = 1;
+  uint32 dataId = 2;
+  int32 count = 3;
+  int32 coin = 4;
+  bool soldOut = 5;
+}
+
+message MsgPendingItemRsp{
+}
+
+message MsgPendingItemNotify{
+  repeated PendingItemData items = 1;
+  PendingItemCommand commandId = 2;
+}
+
+message MsgPendingItemReq{
+  PendingItemCommand commandId = 1;
+  repeated int32 itemsIdx = 2;
+  int32 commandCount = 3;
+}
+
+enum ManageCastleCommand{
+  LevelUp = 0;
+  Dispose = 1;
+}
+
+message MsgManageCastleReq{
+  ManageCastleCommand command = 2;
+  uint64 entityId = 3;
+  int32 commandCount = 4;
+}
+
+//暂时回复一个空的
+message MsgManageCastleRsp
+{
+
+}
+
+message CastleInfo{
+  uint64 entityId = 1;
+  uint32 castleId = 2;
+  uint64 ownerId = 3;
+}
+
+message MsgCastleNotify{
+  repeated CastleInfo infos = 1;
+}
+
+message MsgCastleOwnerNotify{
+  uint64 entityId = 1;
+  repeated uint64 castleIds = 2;
+}
+
+message MsgLordNotify{
+  repeated LordSyncInfo lordInfos = 2;
+}
+
+message FieldInfo{
+  uint64 entityId = 1;
+  uint32 fieldId = 2;
+  ETeam teamId = 3;
+  uint64 ownerEntityId = 4;
+  repeated float customData = 5;
+}
+
+message MsgFieldNotify{
+  repeated FieldInfo infos = 1;
+}
+
+message LordSyncInfo{
+  uint64 entityId = 1;
+  int32 lordId = 2;
+  int32 skinId = 3;
+  uint32 skillId = 4;
+  repeated LordPawnInfo initFormation = 5;
+}
+
+message Position{
+  int32 x = 1;
+  int32 y = 2;
+  int32 z = 3;
+}
+
+message Forward{
+  int32 x = 1;
+  int32 y = 2;
+  int32 z = 3;
+}
+
+message PhysicsInfo{
+  uint64 entityId = 1;
+  Position position = 2;
+  Forward forward = 3;
+  bool isTeleport = 4;
+  EntityState state = 5;
+  int64 stateChangeTime = 6;
+  int64 stateEndTime = 7;
+  repeated EntityState stateChangeList = 8;
+}
+
+message MsgPhysicsNotify{
+  repeated PhysicsInfo physicsInfos = 2;
+}
+
+
+message SquadInfo{
+  uint64 entityId = 1;
+  uint32 squadId = 2;
+  uint64 ownerPlayerId = 3;
+  repeated uint32 fightRewardBuffs = 4;
+}
+
+message MsgSquadNotify{
+  repeated SquadInfo squadInfos = 1;
+}
+
+message GridPropInfo{
+  uint64 entityId = 1;
+  uint32 dataId = 2;
+  uint64 playerId = 3;
+  int32 overrideVisionSize = 5;
+  bool disableUse = 6;
+  int64 timeCreate = 7;
+  int64 timeExpectedChange = 8;
+  int32 period = 9;
+  uint64 teamEttId = 10;
+}
+
+message MsgGridPropNotify{
+  repeated GridPropInfo gridPropInfos = 1;
+}
+
+message MsgSquadOwnerNotify{
+  uint64 entityId = 1;
+  repeated uint64 squadIds = 2;
+}
+
+message PawnInfo{
+  uint64 entityId = 1;
+  uint32 dataId = 2;
+  uint64 squadId = 3;
+}
+
+message MsgPawnNotify{
+  repeated PawnInfo pawnInfos = 1;
+}
+
+message MsgPawnSoltInfo
+{
+  int32 solt = 1;
+  uint64 pawnId = 2;
+}
+
+message MsgPawnsOwnerNotify{
+  uint64 entityId = 1;
+  repeated MsgPawnSoltInfo pawns = 2;
+}
+
+enum EditSquadCommand{
+  MovePawn = 0;
+  LevelUpEntity = 1;
+  ReviveSquad = 3;
+  ChangeRainbowCard = 4;
+}
+
+message MsgEditSquadReq{
+  EditSquadCommand command = 2;
+  uint64 sourceEntityId = 3;
+  uint64 targetEntityId = 4;
+  int32 targetSlotId = 5;
+  int32 commandCount = 6;
+}
+
+message MsgEditSquadRsp
+{}
+
+enum OrderSquadCommand{
+  ReRoll = 0;
+  Scout = 2;
+  Born = 4;
+  CastleTeleport = 5;
+  Cancel = 6;
+  CardTechLevelUp = 7;
+  EconomyTechLevelUp = 8;
+  UsePortal = 9;
+  OneWayTeleport = 11;
+  GrowRadish = 12;
+  CollectRadish = 13;
+  FlyCannon = 14;
+}
+
+message MsgOrderSquadReq{
+  OrderSquadCommand command = 2;
+  uint64 squadEntityId = 3;
+  uint64 commandParam = 4;
+  repeated int32 extraParams = 5;
+  int32 commandCount = 6;
+}
+
+message MsgOrderSquadRsp
+{
+  OrderSquadCommand command = 1;
+}
+
+message ApInfo{
+  uint64 entityId = 1;
+  int32 maxAp = 2;
+  int32 currentAp = 3;
+  int32 restRp = 4;
+  bool canAttack = 5;
+  bool movable = 6;
+  bool canTeleport = 7;
+  bool hasRush = 8;
+  bool canScout = 9;
+  bool canAmbush = 10;
+  int64 nextApTick = 11;
+  int32 minRp = 12;
+  int32 maxRp = 13;
+  float apInterval = 14;
+}
+
+message MsgApNotify{
+  ApInfo apInfo = 1;
+}
+message DpInfo{
+  uint64 entityId = 1;
+  int32 currentDp = 2;
+  int32 maxDp = 3;
+}
+message MsgDpNotify{
+  DpInfo dpInfo = 1;
+}
+
+message MsgPathNotify{
+  uint64 entityId = 1;
+  PathInfo pathInfo = 2;
+}
+
+message PathInfo{
+  int32 moveType = 2;
+  repeated int32 path = 3;
+  float dirX = 4;
+  float dirZ = 5;
+  float modelAcc = 6;
+  int32 afterGoalBehavior = 7;
+}
+
+message BuffData{
+  uint32 buffId = 1;
+  int64 buffEndTime = 2;
+  repeated float param = 3;
+  repeated float details = 4;
+}
+
+message MsgBuffNotify{
+  uint64 entityId = 2;
+  repeated BuffData buffList = 3;
+  repeated uint32 canceledList = 4;
+}
+
+message BattleBuffData{
+  uint32 battleBuffId = 1;
+  uint64 endTick = 2;
+  float detail = 3;
+}
+
+message MsgBattleBuffNotify{
+  uint64 entityId = 1;
+  repeated BattleBuffData battleBuffList = 2;
+  uint64 Tick = 3;
+}
+
+message MsgKcpConnectReq{
+}
+
+message MsgKcpConnectRsp{
+}
+
+
+message MsgScoutResultNotify{
+  uint64 scoutSquadId = 1;
+  repeated uint64 pawnIds = 2;
+}
+
+message MsgSkillResultNotify{
+  uint64 owner = 1;
+  repeated uint64 targets = 2;
+  repeated int64 resultParams = 3;
+  bool stop = 4;
+  int32 index = 5;
+}
+
+message SkillData{
+  uint64 entityId = 1;
+  uint32 buffType = 2;
+  uint32 dataId = 3;
+  int64 coolDownEndTime = 4;
+  int32 usedCount = 5;
+  int32 stackCount = 6;
+  int32 skillPhase = 7;
+  int64 availableEndTime = 8;
+  int64 durationEndTime = 9;
+  float customData = 10;
+  int32 skillIndex = 11;
+}
+
+message MsgSkillSyncRsp{
+  int32 skillIndex = 1;
+  int32 targetGridIdx = 2;  // 技能选中格子
+  uint64 targetEntity = 3;  // 技能选中的目标
+}
+
+message MsgSkillSyncNotify{
+  repeated SkillData skillData = 1;
+}
+
+message MsgSkillRemoveNotify{
+  uint64 entityId = 1;
+  uint32 skillIndex = 2;
+}
+
+message MsgSkillSyncReq{
+  int32 skillIndex = 1;
+  uint32 dataId = 2;
+  int32 targetGridIdx = 5;  // 技能选中格子
+  uint64 targetEntity = 6;  // 技能选中的目标
+  repeated uint64 skillParams = 3;
+  int32 commandCount = 4;
+}
+
+enum PlayerAttribute{
+  RefreshCoin = 0;
+  FreeAwardDelta = 1;
+  FreeDrawDelta = 2;
+  LevelUpCastleCostRate = 3;
+  ResourceGainRatio = 4;
+  GainExtraAdd = 5;
+  FoodExtraAdd = 6;
+  RefreshCoinDiscount = 7;
+  FrageValueRate = 8;          // 卡牌价值(0~1)
+  PawnLvUpLimit = 9;           // pawn卡片等级上限 指代表减少的等级上限
+  ExtraExpRate = 10;           // 所有获得的经验，提高对应数值的百分比 (0~1)
+  ExtraCoinRate = 11;          // 所有获得的金钱，提高对应数值的百分比 (0~1)
+  ExtraWinRecoverRate = 12;    // 战斗胜利后，额外回复最大生命值的百分比 (0~1)
+  ExtraLooseRecoverRate = 13;  // 撤退结算，额外回复最大生命值的百分比 (0~1)
+  DrawCardCirt = 14;           // 抽卡暴击率
+  SellFrageValueRate = 15;     // 卡片贩卖价值收益(0~1)
+  CoinModifyRate = 16;         // 除卖卡外所获得的金钱，其真实获取所要做的修正值的百分比 (0~1)。与ExtraCoinRate的不同在于，此属性对于金币的修改不会影响其经济展示数值
+  
+  DrawCardCombo1 = 21;
+  DrawCardCombo2 = 22;
+  DrawCardCombo3 = 23;
+  DrawCardCombo4 = 24;
+  DrawCardCombo5 = 25;
+  DrawCardCombo6 = 26;
+  DrawCardCombo7 = 27;
+  DrawCardCombo8 = 28;
+  DrawCardCombo9 = 29;
+  DrawCardCombo10 = 30;
+}
+
+message MsgPlayerAttributeData{
+  PlayerAttribute attributeId = 1;
+  int64 value = 2;
+  bool isRemove = 3;
+}
+
+message MsgPlayerAttributeChangeRsp{
+
+}
+
+message MsgPlayerAttributeChangeNotify{
+  uint64 entityId = 1;
+  repeated MsgPlayerAttributeData data = 2;
+}
+
+message MsgPlayerAttributeChangeReq{
+  uint64 entityId = 2;
+  repeated MsgPlayerAttributeData data = 3;
+}
+
+
+message MsgShowMessageNotify{
+  int32 id = 1;
+  repeated string args = 2;
+  ETipMsgType tipType = 3;
+  uint64 entityId = 4;
+}
+
+message MsgDefeatNotify{
+  int32 rank = 1;
+  ETeam winnerTeamId = 2;
+  ETeam loserTeamId = 3;
+}
+
+message MsgKillBossNotify{
+  uint64 entityId = 1;
+}
+
+message MsgDisconnectReq{
+}
+
+message MsgDisconnectNotify{
+}
+
+message MsgMoveCrystalReq{
+  bool isAgree = 1;
+  int32 position = 2;
+  int32 commandCount = 3;
+}
+
+message MsgMoveCrystalRsp{
+}
+
+message GmInfo{
+  int32 level = 1;
+  string info = 2;
+}
+
+message MsgEnterGameNotify{
+}
+
+enum ModifyBattleUnitCommandType{
+  Add = 0;
+  Remove = 1;
+  ChangePlayer = 2;
+  MovePos = 3;
+}
+
+message MsgModifyBattleUnitReq{
+  ModifyBattleUnitCommandType commandType = 2;
+  uint64 entityId = 3;
+  uint32 battleUnitDataId = 4;
+  int32 gridIndex = 5;
+  uint64 ownerId = 6;
+}
+
+//暂时回复一个空的
+message ModifyBattleUnitRsp
+{
+}
+
+message MsgAddBattleUnitsReq{
+  uint64 entityId = 2;
+  string battleUnits = 3;
+}
+
+message AddBattleUnitsRsp
+{
+}
+
+
+enum SimulateBattleMapReqCommandType{
+  Simulate = 0;
+  SimulateWithoutShow = 1;
+}
+
+message MsgSimulateBattleMapReq{
+  SimulateBattleMapReqCommandType commandType = 2;
+  string command = 3;
+}
+
+message SimulateBattleMapRsp
+{
+}
+
+enum BattleMapControlCommandType{
+  Map_Create = 0;
+  Map_Clear = 1;
+  Map_Remove = 2;
+  Map_Play = 3;
+  Map_Pause = 4;
+}
+
+message MsgBattleMapControlReq{
+  BattleMapControlCommandType command = 2;
+  uint64 param = 3;
+}
+
+message MsgBattleMapControlRsp
+{
+}
+
+
+message MsgBattleUnitInfo{
+  uint64 entityId = 1;
+  uint32 battleUnitDataId = 2;
+  Position position = 3;
+  uint64 battleMap = 4;
+  uint64 ownerId = 5;
+  int32 teamId = 6;
+  uint32 originPawn = 7;
+  bool isAdditional = 8;
+}
+
+message MsgBattleUnitNotify{
+  repeated MsgBattleUnitInfo infos = 1;
+}
+
+message MsgBattleCreationInfo{
+  uint64 entityId = 1;
+  uint32 battleCreationDataId = 2;
+  Position position = 3;
+  uint64 battleMap = 4;
+  uint64 ownerId = 5;
+  int32 teamId = 6;
+}
+
+message MsgBattleCreationAddNotify{
+  repeated MsgBattleCreationInfo infos = 1;
+}
+
+enum CoreBattleMapPosition{
+  Attacker = 0;
+  Defender = 1;
+  SupporterLeft = 2;
+  SupporterRight = 3;
+  SupporterUp = 4;
+  SupporterDown = 5;
+}
+
+message MsgBattleMapJoinedInfo{
+  uint64 joinedEntityId = 1;
+  CoreBattleMapPosition mapPosition = 2;
+  uint64 joinedTime = 3;
+  uint32 totalHp = 4;
+  AmbushType ambushType = 5;
+}
+
+enum AmbushType{
+  IsAmbushed = 0;
+  Ambushing = 1;
+  JoinAmbush = 2;
+  NoAmbush = 3;
+}
+
+message RedDotNotifyData{
+  int32 id = 1;
+  int64 startTs = 2;
+  int32 styleData = 3;
+  bool hasCertified = 4;
+}
+
+message MsgBattleMapTeamPlayers{
+  ETeam teamId = 1;
+  repeated uint64 players = 2;
+}
+
+message MsgBattleMapFleeFinishNotify{
+  uint64 entityId = 1;
+}
+
+message MsgBattleMapResultNotify{
+  uint64 entityId = 1;
+  repeated uint64 restPlayers = 2;
+  repeated uint64 winnerPlayers = 3;
+  repeated uint64 losePlayers = 4;
+  repeated uint64 drawPlayers = 5;
+  uint64 castleId = 6;
+  ETeam winnerTeamId = 7;
+  uint64 endTick = 8;
+  int64 endTimeTick = 9;
+}
+
+message MsgBattleMapNotify{
+  uint64 entityId = 1;
+  repeated int32 happenedGridIndex = 2;
+  int32 fightType = 3;
+  repeated MsgBattleMapJoinedInfo joinedInfos = 4;
+  repeated MsgBattleMapTeamPlayers teamPlayers = 5;
+}
+
+message MsgBattleMapPlayerNotify{
+  uint64 entityId = 1;
+  repeated MsgBattleMapJoinedInfo joinedInfos = 2;
+  repeated int32 happenedGridIndex = 3;
+  repeated MsgBattleMapTeamPlayers teamPlayers = 4;
+}
+
+enum EBattleMapEventType{
+  LordEnter = 0;
+  LordSupport = 1;
+  LordDamage = 2;
+  LordKill = 3;
+  LordFleeStart = 4;
+  LordFleeFinish = 5;
+}
+
+message MsgBattleMapEventNotify{
+  uint64 entityId = 1;
+  uint64 tick = 2;
+  EBattleMapEventType eventType = 3;
+  uint64 entitySponsor = 4;
+  repeated uint64 entityTargets = 5;
+  int32 gridIdx = 6;
+  float eventParam = 7;
+  repeated bool entityAttakerFlag = 8;
+}
+
+message BattleUnitFledInfo{
+  uint64 battleUnitEttId = 1;
+  float restHp = 2;
+}
+
+message BattleEntityFledInfo{
+  uint64 battleEntityEttId = 1;
+  repeated BattleUnitFledInfo info = 2;
+  bool fleeFinished = 3;
+}
+
+message MsgBattleMapFledInfoNotify{
+  uint64 battleMapEntityId = 1;
+  repeated BattleEntityFledInfo info = 2;
+}
+
+enum BattleUnitStateType{
+  BattleUnitState_None = 0;
+  Idle = 1;
+  Move = 2;
+  BattleUnitState_Attack = 3;
+  Special = 4;
+  Flee = 5;
+  Die = 6;
+  Stun = 7;
+  Hitback = 8;
+  Removed = 9;
+}
+
+enum BattleDmgType{
+  Dmg = 0;
+  Heal = 1;
+  CriticalDmg = 2;
+}
+
+message MsgBattleDmgInfo {
+  uint64 entityId = 1;
+  uint64 frameTick = 2;
+  BattleDmgType dmgType = 3;
+  uint32 value = 4;
+  uint32 preTaxValue = 5;
+  uint64 attackId = 6;
+}
+
+message MsgBattleDmgNotify{
+  repeated MsgBattleDmgInfo infos = 2;
+}
+
+message MsgAttackCastleNotify{
+  ETeam teamId = 2;
+  uint64 attackId = 3;
+  uint64 takerId = 4;
+}
+
+message MsgHitbackInfo {
+  uint64 startTick = 1;
+  float time = 2;
+  Position startPos = 3;
+  Position endPos = 4;
+  uint32 speedHorizontal = 5;
+  float hitFlyHeight = 6;
+  float flyUpTime = 7;
+  float flyingTime = 8;
+  float flyDownTime = 9;
+}
+
+message MsgBattleUnitStateInfo {
+  uint64 entityId = 1;
+  BattleUnitStateType state = 2;
+  uint64 battleMapTime = 3;
+  uint64 param = 4;
+  Position position = 5;
+  Position targetPosition = 6;
+  uint32 skillId = 7;
+  repeated uint64 skillTargets = 8;
+  MsgHitbackInfo hitbackInfo = 9;
+}
+
+message MsgBattleUnitStateNotify{
+  repeated MsgBattleUnitStateInfo infos = 2;
+}
+
+enum BattleUnitMoveInfoType{
+  ToCell = 0;
+  ToPos = 1;
+}
+
+message MsgBattleUnitMoveInfo {
+  uint64 entityId = 1;
+  BattleUnitMoveInfoType infoType = 2;
+  int32 nextCellId = 3;
+  Position toPos = 4;
+}
+
+message MsgBattleUnitMoveNotify{
+  repeated MsgBattleUnitMoveInfo infos = 2;
+}
+
+
+
+message MsgBattleInstantSkillInfo {
+  uint64 entityId = 1;
+  uint64 battleMapTime = 2;
+  uint32 skillId = 3;
+  repeated uint64 skillTargets = 4;
+}
+
+message MsgBattleInstantSkillNotify{
+  repeated MsgBattleInstantSkillInfo infos = 2;
+}
+
+enum BattlePlayerCommandType{
+  Player_Flee = 0;
+}
+
+message MsgBattlePlayerCommandReq{
+  uint64 battleMapEntityId = 1;
+  uint64 entityId = 2;
+  BattlePlayerCommandType command = 3;
+  int32 commandCount = 4;
+}
+
+message MsgBattlePlayerCommandRsp
+{
+}
+
+message MsgBattleMapTimerNotify{
+  uint64 entityId = 2;
+  uint64 frameTick = 3;
+  bool isPause = 4;
+}
+
+enum BattleAttribute
+{
+  Hp = 0;
+  BasicHp = 1;
+  Mp = 2;
+  MaxMp = 3;
+  Speed = 4;
+  Attack = 5;
+  Defend = 6;
+  AttackRange = 7;
+  AttackSpeed = 8;
+  AttackGainMp = 9;
+  DamageGainMp = 10;
+  CriticalRate = 11;
+  CriticalDamageRate = 12;
+  PerHp = 13;
+  PerAttack = 14;
+  PerDefend = 15;
+  AdditiveDefend = 16;
+  PerAttackSpeed = 17;
+  AdditiveAttackRange = 18;
+  PerMoveSpeed = 19;
+  AdditiveEnergy = 20;
+  TakeDamageIncrease = 21;
+  DamageTakenDecrease = 22;
+  SuckBloodRate = 23;
+  HealTakenIncrease = 24;
+  Toughness = 25;
+  SkillDamageIncrease = 26;
+  BasicModelScale = 27;
+  PerModelScale = 28;
+  MaxHP = 100;
+  CurAttack = 101;
+  CurDef = 102;
+  CurAttackSpeed = 103;
+  CurAttackRange = 104;
+  CurMoveSpeed = 105;
+  CurModelScale = 106;
+}
+
+message MsgBattleUnitAttributeItem{
+  BattleAttribute attribute = 1;
+  float value = 2;
+}
+
+message MsgBattleUnitAttributeInfo{
+  uint64 entityId = 1;
+  repeated MsgBattleUnitAttributeItem attributes = 2;
+  uint64 frameTick = 3;
+  bool takeCriticalDmg = 4;
+}
+
+message MsgBattleUnitAttributeNotify{
+  repeated MsgBattleUnitAttributeInfo battleUnitAttributes = 2;
+}
+
+message PlayerInfo{
+  uint64 entityId = 1;
+  ETeam teamId = 2;
+  bool isCaptain = 3;
+  string playerName = 4;
+  int32 playerId = 5;
+  string userId = 6;
+  repeated KDAValue kda = 7;
+}
+
+message MsgPlayerNotify{
+  repeated PlayerInfo playerInfos = 1;
+}
+
+message MsgBattleMapSetPlayerInfoReq{
+  uint64 mapEntityId = 2;
+  uint64 ownerId = 3;
+  float hpPercent = 4;
+}
+
+message MsgBattleMapSetPlayerInfoRsp
+{
+}
+
+message AmbushInfo{
+  uint64 entityId = 1;
+  int32 ambushGridIdx = 2;
+  AmbushState state = 3;
+}
+
+message MsgAmbushNotify{
+  AmbushInfo ambushInfo = 1;
+}
+
+enum AmbushState{
+  No_Ambush = 0;
+  Loading_Ambush = 1;
+  Finish_Ambush = 2;
+}
+
+enum ChatChannel{
+  All = 0;
+  Chat_Team1 = 1;
+  Chat_Team2 = 2;
+  Chat_Team3 = 3;
+  Chat_Team4 = 4;
+}
+
+message MsgNormalChatReq{
+  ChatChannel channel = 2;
+  string message = 3;
+}
+
+message NormalChatContent{
+  int32 playerId = 1;
+  uint64 frameTick = 2;
+  ChatChannel channel = 3;
+  string message = 4;
+}
+
+message MsgNormalChatRsp{
+}
+
+message MsgNormalChatNotify{
+  repeated NormalChatContent chatList = 1;
+}
+
+enum ParamChatType{
+  Mark = 0;
+  Pawn = 1;
+  QuickMsg = 2;
+  Emoji = 3;
+}
+
+message ParamChatContent{
+  int32 playerId = 1;
+  uint64 frameTick = 2;
+  ChatChannel channel = 3;
+  ParamChatType chatType = 4;
+  uint64 chatParam1 = 5;
+  uint64 chatParam2 = 6;
+}
+
+message MsgParamChatReq{
+  ChatChannel channel = 2;
+  ParamChatType chatType = 3;
+  uint64 chatParam1 = 4;
+  uint64 chatParam2 = 5;
+}
+
+message MsgParamChatRsp{
+}
+
+message MsgParamChatNotify{
+  repeated ParamChatContent chatList = 1;
+}
+
+message MsgPlayerCommandNotify{
+  int32 commandCount = 2;
+}
+
+message JoinBattleUnitInfo{
+  uint64 entityId = 1;
+  uint32 battleUnitDataId = 2;
+  uint32 posX = 3;
+  uint32 posY = 4;
+  uint64 ownerId = 5;
+  int32 teamId = 6;
+  uint32 originPawn = 7;
+  repeated MsgBattleUnitAttributeItem attributes = 8;
+  BattleUnitStateType state = 9;
+  uint64 param = 10;
+  Position targetPosition = 11;
+  float stateCoolDown = 12;
+  uint32 overrideActiveSkillId = 13;
+}
+
+message MsgJoinBattleNotify{
+  uint64 battleMap = 1;
+  uint64 frameTick = 2;
+  repeated JoinBattleUnitInfo unitInfos = 3;
+}
+
+message MsgGmCommandReq{
+  string funcName = 2;
+  repeated string para = 3;
+}
+
+message MsgTutorialCommandReq{
+  string funcName = 2;
+  repeated string para = 3;
+}
+
+message ReconnectGameContext{
+  int64 gameStateStartTicks = 1;
+  int32 gameState = 2;
+  repeated CrystalRingInfo ringInfos = 4;
+  int64 gameTimeTicks = 5;
+  repeated SpawnerInfo spawnerInfos = 6;
+}
+
+message ReconnectTeamInfo{
+  TeamInfo teamInfo = 1;
+  ResourceInfo resourceInfo = 2;
+  int32 winnerScore = 3;
+  TeamTechInfo teamTechInfo = 4;
+  repeated uint64 castleIds = 5;
+  repeated uint64 squadIds = 6;
+}
+
+message PlayerReviveInfo{
+  int64 revivalTime = 1;
+  int64 buySquadCdEndTime = 2;
+}
+
+message ReconnectPlayerInfo{
+  PlayerInfo playerInfo = 1;
+  PhysicsInfo physicsInfo = 2;
+  HpInfo hpInfo = 3;
+  int32 lordId = 4;
+  ResourceInfo resourceInfo = 5;
+  repeated VisionInfo visionInfo = 6;
+  repeated MsgPawnSoltInfo pawns = 7;
+  repeated SkillData skill = 8;
+  repeated BuffData buffData = 9;
+  TeamTechInfo playerTechInfo = 10;
+  int32 skinId = 11;
+  AmbushInfo ambushInfo = 12;
+  PlayerReviveInfo playerReviveInfo = 13;
+  uint32 skillId = 14;
+  PathInfo pathInfo = 15;
+  PlayerVisInfo visInfo = 16;
+}
+message ReconnectPawnInfo{
+  PawnInfo pawnInfo = 1;
+  repeated BuffData buffData = 2;
+}
+message ReconnectCastleInfo{
+  CastleInfo castleInfo = 1;
+  PhysicsInfo physicsInfo = 2;
+  HpInfo hpInfo = 3;
+  repeated VisionInfo visionInfo = 4;
+  int32 winnerScore = 5;
+}
+message ReconnectSquadInfo{
+  SquadInfo squadInfo = 1;
+  PhysicsInfo physicsInfo = 2;
+  HpInfo hpInfo = 3;
+  repeated VisionInfo visionInfo = 4;
+  repeated BuffData buffData = 5;
+}
+
+message ReconnectFieldInfo{
+  FieldInfo fieldInfo = 1;
+  PhysicsInfo physicsInfo = 2;
+  repeated VisionInfo visionInfo = 3;
+}
+
+message ReconnectGridPropInfo{
+  GridPropInfo gridPropInfo = 1;
+  PhysicsInfo physicsInfo = 2;
+  repeated VisionInfo visionInfo = 3;
+}
+message ReconnectSelfPlayerInfo{
+  uint64 entityId = 1;
+  int32 commandCount = 5;
+  repeated PendingItemData pendingItems = 6;
+  uint64 selfTeamId = 7;
+  repeated EnemyPlayerPawnInfo enemyPlayerPawnInfos = 8;
+  int32 restSurrenderCount = 9;
+  repeated MsgPlayerAttributeData attrDatas = 10;
+  MoveCrystalInfo moveCrystalInfo = 11;
+}
+
+message ReconnectSelfTeamMemberInfo{
+  ApInfo apInfo = 1;
+  BagInfo bagInfo = 2;
+  DpInfo dpInfo = 3;
+}
+
+message MsgReconnectInfoNotify{
+  ReconnectGameContext context = 1;
+  repeated ReconnectTeamInfo teamInfos = 2;
+  repeated ReconnectPlayerInfo playerInfos = 3;
+  repeated ReconnectPawnInfo pawnInfos = 4;
+  repeated ReconnectCastleInfo castleInfos = 5;
+  repeated ReconnectSquadInfo squadInfos = 6;
+  repeated ReconnectGridPropInfo gridPropInfos = 7;
+  repeated ReconnectSelfTeamMemberInfo selfTeamMemberInfo = 8;
+  ReconnectSelfPlayerInfo selfPlayerInfo = 9;
+  repeated ReconnectFieldInfo fieldInfos = 10;
+  repeated MsgBattleHistoryInfoNotify selfBattleHistory = 11;
+}
+
+message MsgInvalidNotify{
+
+}
+
+message MsgSurrenderReq{
+  bool agree = 1;
+  bool isStarter = 2;
+  int32 commandCount = 3;
+}
+
+message MsgSurrenderRsp{
+}
+
+message MsgSurrenderNotify{
+  uint64 playerEId = 1;
+  repeated uint64 agreeList = 2;
+  repeated uint64 rejectList = 3;
+  int64 surrenderTime = 4;
+  bool isSurrendering = 5;
+  int32 needSurrenderCount = 6;
+}
+
+message MsgSurrenderSuccessNotify{
+  ETeam teamId = 1;
+  int64 surrenderTime = 2;
+}
+
+message MsgPlayerSurrenderNotify{
+  int32 restCount = 1;
+}
+
+message NormalValueType{
+  bool vbool = 1;
+  int32 vi32 = 2;
+  uint32 vui32 = 3;
+  string vs = 4;
+  bytes vbytes = 5;
+  repeated int32 vri32 = 6;
+}
+
+message MsgTestReq{
+  NormalValueType val = 1;
+}
+
+message MsgTestRsp{
+  NormalValueType val = 1;
+}
+
+message RewardInfo{
+  uint32 rewardType = 1;
+  int32 value = 2;
+}
+
+message MsgRewardNotify{
+  repeated RewardInfo rewards = 1;
+  bool isBattle = 2;
+}
+
+message LobbyStoreRedDotInfo{
+  repeated int32 clickedStoreItems = 1;
+}
+
+enum EPlayerBattleResult
+{
+  BattleResult_None = 0;   //无事发生
+  BattleResult_Dead = 1;   //死亡
+  BattleResult_Flee = 2;   //逃跑
+}
+
+message MsgPlayerBattleInfo{
+  uint64 playerId = 4;
+  repeated uint64 killPlayer = 1;
+  repeated MsgBattleUnitBattleInfo battleUnits = 2;
+  EPlayerBattleResult battleResult = 3;
+}
+
+message MsgBattleUnitBattleInfo{
+  uint32 pawnId = 1;
+  //  uint32 battleUnitId = 2;  //暂时没有意义 召唤物没有图标显示 先注释掉
+  uint32 DmgValue = 3;
+  uint32 TakeDmgValue = 4;
+  uint32 HealValue = 5;
+}
+
+message MsgBattleHistoryInfoNotify{
+  ETeam winnerTeam = 1;
+  int64 startTime = 2;
+  uint64 duringTime = 3;
+
+  repeated MsgPlayerBattleInfo playersInfo = 4;
+}
+
+// 彩虹卡的的阵容细节(为以后自定义阵容预留 todo)
+message MsgCoreCardDeployDetail
+{
+  // 卡号(包括彩虹卡)列表, 一般5个数(由玩家编辑)
+  repeated int32 CardIds = 1;
+  // 位置列表, 一般5个数(由玩家编辑)
+  repeated int32 Pos = 2;
+}
+
+// 彩虹卡的当前选用的阵容
+message MsgCoreCardDeploySelected
+{
+  // 分类:
+  // 1: 使用了推荐 RecommendTeam.csv 中的推荐阵容. (1) DeployId 中会填写 RecommendTeam.csv 中的 id
+  // 2: 使用了自定义阵容. (1) DeployId 中会填写自定义阵容的 id. (2) DeployDetail 中会填写自定义阵容的细节 (为以后自定义阵容预留 todo)
+  int32 Type = 1;
+
+  int32 DeployId = 2;
+
+  // 阵容细节
+  MsgCoreCardDeployDetail DeployDetail = 3;
+}
+
+// 排位赛信息
+message PlayerRankInfo
+{
+	// 段位
+	int32 RankId = 1;
+	// 星数
+	int32 Star = 2;
+}
+
+message MsgDisPlayerRankGameInfo
+{
+  /// 当前的段位
+  int32 RankId = 1;
+
+  /// 当前段位的星数
+  int32 Star = 2;
+}
+
+message MsgMatchPlayerDisPlayerInfo
+{
+  /// 头像
+  int32 Head = 1;
+  /// 排位赛信息
+  MsgDisPlayerRankGameInfo RankGameInfo = 2;
+  //MMR分数
+  int32 MMRScore = 3;
+  //修正后的MMR分数
+  int32 FixedMMRScore = 4;
+}
+
+message SeatPlayer{
+  string name = 1;
+  string id = 2;
+  string ip = 3;
+  int64 teamId = 4;
+  string token = 5;
+  int32 selectedLord = 6;
+  int32 selectedSkin = 7;
+  int32 initialCoreCardIndex = 8;
+  uint32 kcpConv = 9;
+  string voiceChatId = 10;
+  int32 botId = 11;
+  int32 botTypeId = 12;
+  uint32 selectSkill = 13;
+  MsgCoreCardDeploySelected coreCardDeploySelected = 14;
+  //int32 MMRScore = 15;
+  MsgMatchPlayerDisPlayerInfo disPlayerInfo = 16; //玩家展示信息
+}
+
+enum LoadingType{
+  LTNone = 0;
+  LTTeleport = 1;
+  LTLordSkill = 2;
+  LTAmbush = 3;
+  LTGrowRadish = 4;
+  LTCollectRadish = 5;
+  LTFlyCannon = 6;
+  LTBackHome = 7;
+}
+
+message LoadingInfo{
+  uint64 entityId = 1;
+  LoadingType loadingType = 2;
+  int64 startLoadingTime = 3;
+  int64 endLoadingTime = 4;
+}
+
+message MsgLoadingNotify{
+  repeated LoadingInfo loadingInfos = 1;
+}
+
+message MsgAnimNotify{
+  uint64 entityId = 1;
+  string animName = 2;
+}
+
+message MsgSelectLordFormationReq{
+  repeated LordPawnInfo lordFormation = 1;
+  int32 commandCount = 2;
+}
+
+message MsgSelectLordFormationRsp{
+}
+
+enum PlayerVisState {
+  PVS_Shopping = 0;
+  PVS_Flee = 1;
+  PVS_DisConnect = 2;
+  PVS_Fighting = 3;
+}
+
+message MsgPlayerVisStateReq{
+  PlayerVisState state = 1;
+  bool stateValue = 2;
+}
+
+message MsgPlayerVisStateRsp{
+}
+
+message PlayerVisInfo{
+  uint64 entityId = 1;
+  uint64 state = 2;
+}
+
+message MsgPlayerVisStateNotify{
+  repeated PlayerVisInfo infos = 1;
+}
+
+message MsgBattleSkillNotify{
+  uint64 entityId = 1;
+  uint32 overrideActiveSkillId = 2;
+}
+
+message SpawnerInfo{
+  uint64 entityId = 1;
+  uint32 dataId = 2;
+  int64 revivalTick = 3;
+  int32 targetGridIndex = 4;
+  uint32 targetDataId = 5; 
+}
+
+message MsgSpawnerSyncNotify{
+  repeated SpawnerInfo infos = 1;
+}
+
+message MsgCardLevelUpNotify{
+  uint32 originId = 1;
+  uint32 targetId = 2;
+}
+
+message MsgSkillPrepareReq{
+  int32 skillIndex = 1;
+  uint32 dataId = 2;
+  bool isPrepare = 3;
+  int32 targetGridIdx = 4;  // -1 means not select grid
+  int32 commandCount = 5;
+}
+
+message MsgSkillPrepareRsp{
+}
+
+message MsgSkillPrepareNotify{
+  uint64 entityId = 1;
+  int32 skillIndex = 2;
+  uint32 dataId = 3;
+  bool isPrepare = 4;
+  int32 targetGridIdx = 5;  // -1 means not select grid
+  int32 phase = 6;
+}
