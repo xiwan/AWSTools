@@ -2,7 +2,12 @@ import socket
 import threading
 import argparse
 import json
+
+## proto
 import progen.python.todolist_pb2 as TodoList
+import progen.python.omni.base_pb2 as base_pb2
+import progen.python.omni.msg_pb2 as msg_pb2
+
 from Core.protoKlass import ProtoKlass
 from datetime import datetime
 

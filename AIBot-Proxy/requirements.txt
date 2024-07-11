@@ -3,3 +3,4 @@ Flask_Script==2.0.6
 protobuf==4.24.3
 websocket_client==1.6.1
 websockets==11.0.3
+markupsafe==2.0.1
