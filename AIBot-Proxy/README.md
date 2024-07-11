@@ -35,7 +35,7 @@ python3 wsServer.py [--host localhost --port 8765]
 ### a testing tcp server (serve proto response) port : 8000
 
 ```
-python3 tcpSrver.py [--host localhost --port 8000]
+python3 tcpServer.py [--host localhost --port 8000]
 ```
 
 ### proxysrever (wssclient + httpserver) serving port 5000
@@ -55,6 +55,31 @@ python3 proxy.py --host 0.0.0.0 --port 5000 [--mode tcp]
 * http://0.0.0.0:5000/action
 
 **state**: you can pass a json {"code": 10117} to get targeting queue msg, if code = 0, it will return last successful state msg
+
+
+## For Omni adaptor
+
+Every request is **BaseReq**, every reponse is **BaseRsp**
+
+For BaseReq, protoId = msg.BattleProtoIds, requestId = client auto incrementalid, data = msg REQ pb of correponding protoId
+
+Final req payload = 4 bytes req length + basereq content
+
+For BaseRsp, protoId = msg.BattleProtoIds, errorCode = base.ErrorCode, repsonseId = requestId, notifySeqId = server auto incrementalid, data = msg RSP pb of correponding protoId
+
+repsonseId = 0 is the notifying message from server
+
+Final res payload = 4 bytes res length + baseres content
+
+
+```
+# proxy server
+python3 proxy.py --host 0.0.0.0 --port 5000 --mode tcp 
+
+# mock tcp server (optional)
+python3 tcpServer.py --host localhost --port 8000
+
+```
 
 ## how to config
 
