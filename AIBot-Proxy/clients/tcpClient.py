@@ -66,7 +66,8 @@ class TcpConnector(object):
                 logging.info(f"### OnOpen {tcpdata} format: {msg}")
                 if tcpdata == 1:
                     proto = ProtoKlass()
-                    send_data = proto.SendHandler(str(msg))
+                    send_data = proto.sendPayload(msg)
+                    #send_data = proto.SendHandler(str(msg))
                     self.SendByte(send_data)
                 else:
                     self.SendByte(str(msg).encode('utf-8'))
@@ -91,7 +92,8 @@ class TcpConnector(object):
                     # msg = revcdata.decode(encoding='utf-8')
                     if tcpdata == 1:
                         proto = ProtoKlass()
-                        proto2json = proto.RevHandler(revcdata)
+                        proto2json = proto.revPayload(revcdata)
+                        # proto2json = proto.RevHandler(revcdata)
                         self.PutOutMsg(proto2json)
                         logging.info(f"### OnMessage bytes ###: {proto2json}")
                     else:

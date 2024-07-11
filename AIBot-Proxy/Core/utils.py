@@ -3,6 +3,7 @@ import threading
 import asyncio
 import time
 import os
+import re
 
 from datetime import date
 from flask import Flask, jsonify, has_request_context, copy_current_request_context, request
@@ -61,6 +62,17 @@ def run_async(func):
  
     return _wrapper
 
+def encodeLittle(num):
+  return num.to_bytes(4, byteorder='little')   
+
+def encodeBig(num):
+  return num.to_bytes(4, byteorder='big') 
+
+def getbyteLittle(num):
+  return num.to_bytes(4, byteorder='little')
+
+def getbyteBig(num):
+  return num.to_bytes(4, byteorder='big')
 
 def decodeLittle(CSID): 
   return int.from_bytes(CSID, byteorder='little')
@@ -70,6 +82,20 @@ def decodeBig(CSID):
 
 def getbyteLitte(CSID): 
   return CSID.to_bytes(4, byteorder='little')
+
+def autoIdIncrementor(max_id=99999999):
+    id_value = 0
+    while max_id is None or id_value < max_id:
+        id_value += 1
+        yield id_value
+
+def protoMsgConverter(input_str):
+    pattern = r"(_)([A-Z])"
+    result = re.sub(pattern, lambda x: x.group(2), input_str)
+    req = "Msg" + result
+    res = req.replace("Req", "Rsp")
+    
+    return (req, res)
 
 # 创建 Thread 的子类
 class CustomThread(threading.Thread):

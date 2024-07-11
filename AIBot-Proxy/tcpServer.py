@@ -8,8 +8,13 @@ import progen.python.todolist_pb2 as TodoList
 import progen.python.omni.base_pb2 as base_pb2
 import progen.python.omni.msg_pb2 as msg_pb2
 
-from Core.protoKlass import ProtoKlass
 from datetime import datetime
+from Core.protoKlass import ProtoKlass
+from Core.utils import run_async, autoIdIncrementor, protoMsgConverter
+from Core.utils import encodeLittle, encodeBig, decodeLittle, decodeBig
+
+clientIdGen = autoIdIncrementor()
+serverIdGen = autoIdIncrementor()
 
 def example_proto(task):
     dt = datetime.now()  
@@ -25,7 +30,6 @@ def example_proto(task):
     proto = ProtoKlass()
     return proto.SerializeToString(my_list)
 
-
 def proto_handler(recv_data):
     proto = ProtoKlass()
     jsonstr = proto.RevHandler(recv_data)
@@ -39,6 +43,36 @@ def echo_handler(recv_data):
     send_data = msg.encode("utf-8")
     return send_data
 
+
+def mockServerHandler(recv_data):
+    print("====mockServerHandler====")
+    proto = ProtoKlass()
+
+    all_len = len(recv_data)
+    if all_len < 4:
+        return
+    bin_len = decodeLittle(recv_data[:4])
+    bin = recv_data[4:]
+    print(bin_len, bin)
+
+    baseReq = base_pb2.BaseReq()
+    proto.ParseFromString(baseReq, bin)
+
+    baseRsp = base_pb2.BaseRsp()
+    baseRsp.protoId =  baseReq.protoId
+    baseRsp.responseId = baseReq.requestId
+    baseRsp.notifySeqId = next(serverIdGen)
+    baseRsp.errorCode = base_pb2.ErrorCode.Value('Err_GmCommondReq')
+    # baseRsp.data = 
+
+    # resValue = getattr(msg_pb2, protoMsgRsp)
+    # reqInstance = resValue()
+
+    # payload rev from server
+    server_payload = proto.sendPayload(baseRsp)
+
+    return server_payload
+
 def dispose_client_request(tcp_client_1, tcp_client_address):
     while True:
         try:
@@ -49,7 +83,8 @@ def dispose_client_request(tcp_client_1, tcp_client_address):
 
             # send_data = echo_handler(recv_data)
 
-            send_data = proto_handler(recv_data)
+            # send_data = proto_handler(recv_data)
+            send_data = mockServerHandler(recv_data)
             print("send_data:", send_data)
             tcp_client_1.send(send_data)
 
