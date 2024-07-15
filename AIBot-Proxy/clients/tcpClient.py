@@ -9,6 +9,7 @@ from Core.utils import run_async, decodeLittle, decodeBig, getbyteLitte, singlet
 from Core.protoKlass import ProtoKlass
 
 remoteTcp = config['remoteTcp']
+remoteHttp = config['remoteHttp']
 secretKey = config['secretKey']
 tcpdata = int(config['tcpdata'])
 
@@ -92,10 +93,11 @@ class TcpConnector(object):
                     # msg = revcdata.decode(encoding='utf-8')
                     if tcpdata == 1:
                         proto = ProtoKlass()
-                        proto2json = proto.revPayload(revcdata)
-                        # proto2json = proto.RevHandler(revcdata)
-                        self.PutOutMsg(proto2json)
-                        logging.info(f"### OnMessage bytes ###: {proto2json}")
+                        protoData = proto.revPayloadProto(revcdata)
+
+                        # protoData = proto.RevHandler(revcdata)
+                        self.PutOutMsg(protoData)
+                        logging.info(f"### OnMessage bytes ###: {protoData}")
                     else:
                         self.PutOutMsg(revcdata.decode("utf-8"))
                 elif isinstance(revcdata, str):

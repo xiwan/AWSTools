@@ -14,13 +14,15 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from configparser import ConfigParser
 
 cfg = ConfigParser()
-cfg.read("./config/env.local.ini")
+# cfg.read("./config/env.local.ini")
+cfg.read("./config/env.omni.prd.ini")
 
 config = cfg['config']
 routeTable = cfg['route']
 
 remoteUri = cfg['config']['remoteUri']
 remoteTcp = cfg['config']['remoteTcp']
+remoteHttp = cfg['config']['remoteHttp']
 secretKey = cfg['config']['secretKey']
 wssdata = cfg['config']['wssdata']
 tcpdata = cfg['config']['tcpdata']

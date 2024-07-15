@@ -4,7 +4,7 @@ import json
 from flask import Flask, request, session, jsonify, has_request_context, copy_current_request_context
 from flask_script import Manager
 from functools import wraps
-from Core.utils import remoteUri, remoteTcp, secretKey, logging
+from Core.utils import remoteUri, remoteTcp, remoteTcp, secretKey, logging
 from Core.utils import run_async, autoIdIncrementor, protoMsgConverter
 from Core.utils import encodeLittle, encodeBig, decodeLittle, decodeBig
 from Core.protoKlass import ProtoKlass
@@ -167,7 +167,18 @@ async def omni():
 
         # server_payload = mockServer(client_payload)
         # return proto.revPayload(server_payload)
-        return await mainHandler(baseReq)
+        protoPackage = await mainHandler(baseReq)
+        jsonPackage = proto.MessageToJson(protoPackage)
+
+        rspValue = getattr(msg_pb2, protoMsgRsp)
+        rspInstance = rspValue()
+        protoData = None
+        if protoPackage.data is not None:
+            proto.ParseFromString(rspInstance, protoPackage.data)
+            jsonPackage["data"] = proto.MessageToJson(rspInstance)
+            pass
+        
+        return jsonPackage
     except Exception as e:
         return {"Error": str(e)}
 

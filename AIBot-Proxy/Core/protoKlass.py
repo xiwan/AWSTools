@@ -7,13 +7,14 @@ from Core.utils import encodeLittle, encodeBig, decodeLittle, decodeBig
 import progen.python.todolist_pb2 as TodoList
 import progen.python.omni.base_pb2 as base_pb2
 import progen.python.omni.msg_pb2 as msg_pb2
+import json
 
 class ProtoKlass:
     def __init__(self):
         pass
 
     def MessageToJson(self, message):
-        return MessageToJson(message)
+        return json.loads(MessageToJson(message))
 
     def MessageToDict(self, message):
         return MessageToDict(message)
@@ -30,9 +31,21 @@ class ProtoKlass:
     def sendPayload(self, send_data):
         bin = self.SerializeToString(send_data)
         bin_len = len(bin)
-        # print(bin_len, bin)
+        print("sendPayload", bin_len, bin)
         payload = encodeLittle(bin_len) + bin
         return payload
+    
+    def revPayloadProto(self, recv_data):
+        all_len = len(recv_data)
+        if all_len < 4:
+            return
+        bin_len = decodeLittle(recv_data[:4])
+        bin = recv_data[4:]
+        print("revPayload", bin_len, bin)
+
+        baseRsp = base_pb2.BaseRsp()
+        self.ParseFromString(baseRsp, bin)
+        return baseRsp
 
     def revPayload(self, recv_data):
         all_len = len(recv_data)
@@ -40,7 +53,7 @@ class ProtoKlass:
             return
         bin_len = decodeLittle(recv_data[:4])
         bin = recv_data[4:]
-        # print(bin_len, bin)
+        print("revPayload", bin_len, bin)
 
         baseRsp = base_pb2.BaseRsp()
         self.ParseFromString(baseRsp, bin)
