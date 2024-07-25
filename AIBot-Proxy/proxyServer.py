@@ -107,29 +107,6 @@ import progen.python.todolist_pb2 as TodoList
 import progen.python.omni.base_pb2 as base_pb2
 import progen.python.omni.msg_pb2 as msg_pb2
 
-@app.route('/protos', methods=['GET', 'POST'])
-@run_async
-async def protos():
-    my_list = TodoList.TodoList()
-    my_list.owner_id = 77777
-    my_list.owner_name = "Benxiwan"
-
-    first_item = my_list.todos.add()
-    first_item.state = TodoList.TaskState.Value("TASK_DONE")
-    first_item.task = "Test ProtoBuf for Python"
-    first_item.due_date = "31.10.2019"
-
-    proto = ProtoKlass()
-
-    bin = proto.SerializeToString(my_list)
-    print(bin)
-
-    print("==========")
-    my_list2 = TodoList.TodoList()
-    proto.ParseFromString(my_list2, bin)
-    print(my_list2)
-    return proto.MessageToJson(my_list)
-
 @app.route('/omni', methods=['POST'])
 @run_async
 async def omni():
@@ -140,7 +117,7 @@ async def omni():
         protoMsgReq, protoMsgRsp = protoMsgConverter(protoId)
         protoData = data.get('data', None)
         requestId = next(clientIdGen)
-        print(f'==== {requestId}, {protoId}, {protoMsgReq}, {protoMsgRsp}, {protoData}===')
+        print(f'==== omni: {requestId}, {protoId}, {protoMsgReq}, {protoMsgRsp}, {protoData}===')
 
         if not hasattr(msg_pb2.BattleProtoIds, protoId):
             raise Exception(f"protoId {protoId} not found")
@@ -169,7 +146,7 @@ async def omni():
         # return proto.revPayload(server_payload)
         protoPackage = await mainHandler(baseReq)
         jsonPackage = proto.MessageToJson(protoPackage)
-
+    
         rspValue = getattr(msg_pb2, protoMsgRsp)
         rspInstance = rspValue()
         protoData = None
@@ -181,6 +158,35 @@ async def omni():
         return jsonPackage
     except Exception as e:
         return {"Error": str(e)}
+
+
+@app.route('/omni/notify', methods=['POST'])
+@run_async
+async def omniNotify():
+    proto = ProtoKlass()
+    data = request.get_json()
+    try:
+        protoId = data.get('protoId')
+        protoMsgReq, protoMsgRsp = protoMsgConverter(protoId)
+        protoData = data.get('data', None)
+        requestId = next(clientIdGen)
+        code = msg_pb2.BattleProtoIds.Value(protoId)
+        print(f'==== notify: {requestId}, {protoId}, {protoMsgReq}, {protoMsgRsp}, {code}, {protoData}===')
+
+        protoPackage = await ts.FetchStateDictMsg(code)
+        jsonPackage = proto.MessageToJson(protoPackage)
+        print(jsonPackage)
+        rspValue = getattr(msg_pb2, protoMsgRsp)
+        rspInstance = rspValue()
+        if protoPackage.data is not None:
+            proto.ParseFromString(rspInstance, protoPackage.data)
+            jsonPackage["data"] = proto.MessageToJson(rspInstance)
+            pass
+
+        return jsonPackage
+    except Exception as e:
+        return {"Error": str(e)}
+
 
 @app.route('/omni_test', methods=['POST'])
 @run_async
@@ -222,6 +228,28 @@ async def omni_test():
     except Exception as e:
         return {"Error": str(e)}
 
+@app.route('/protos', methods=['GET', 'POST'])
+@run_async
+async def protos():
+    my_list = TodoList.TodoList()
+    my_list.owner_id = 77777
+    my_list.owner_name = "Benxiwan"
+
+    first_item = my_list.todos.add()
+    first_item.state = TodoList.TaskState.Value("TASK_DONE")
+    first_item.task = "Test ProtoBuf for Python"
+    first_item.due_date = "31.10.2019"
+
+    proto = ProtoKlass()
+
+    bin = proto.SerializeToString(my_list)
+    print(bin)
+
+    print("==========")
+    my_list2 = TodoList.TodoList()
+    proto.ParseFromString(my_list2, bin)
+    print(my_list2)
+    return proto.MessageToJson(my_list)
 
 def mockServer(recv_data):
     print("====mockServer====")

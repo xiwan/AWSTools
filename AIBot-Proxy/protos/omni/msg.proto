@@ -197,11 +197,16 @@ enum BattleProtoIds {
   SkillPrepare_Req = 168;
   SkillPrepare_Rsp = 169;
   SkillPrepare_Notify = 170;
+  Reconnect_Req = 171;
+  Reconnect_Rsp = 172;
 
   Test_Req = 9998;
   Test_Rsp = 9999;
 } //
 // WinnerScore_Notify = 101; // 老版战略分协议, 策划说先注释
+message MsgReconnectReq{
+  string info = 1;
+}
 
 message MsgGmCommandRsp{
   string info = 1;
@@ -226,16 +231,23 @@ message MsgMoveCrystalAnimNotify{
   uint64 newCrystalId = 2;
 }
 
+// 攻城成功后获胜积分变更通知
+// 城池身上有一个“累积分”，这个“累积分”会随着时间流逝增加。当这座城被攻占后，占领方将会掠夺掉这些“累积分”的一部分计入自己队伍的分数中
 message MsgCastleWinnerScoreNotify{
+  // 胜利方积分变更信息
   repeated CommonWinnerScoreItem datas = 1;
 }
 
 message CommonWinnerScoreItem{
+  // 实体id
   uint64 entityId = 1;
+  // 分数
   int32 score = 2;
 }
 
+// 队伍胜利积分变更通知
 message MsgTeamWinnerScoreNotify{
+  // 队伍积分变更数据
   repeated CommonWinnerScoreItem datas = 1;
 }
 
@@ -244,15 +256,22 @@ message MsgKDANotify{
 }
 
 enum KDA{
+  // 击杀
   K = 0;
+  // 死亡
   D = 1;
+  // 助攻
   A = 2;
+  // 攻城
   C = 3;
 }
 
 message KDAValue{
+  // KDA数据类型
   KDA key = 1;
+  // 对应的值
   int32 val = 2;
+  // 数据所属的领主EntityId
   uint64 entityId = 3;
 }
 
@@ -261,26 +280,35 @@ message MsgResetGridSelectNotify{
 }
 
 message MsgPlayerMoveAttackReq{
-  repeated int32 path = 1;
-  int32 toGridIdx = 2;
+  repeated int32 path = 1;		
+  int32 toGridIdx = 2;			
 }
 
 message MsgPlayerMoveAttackRsp{
   
 }
 
+// 天赋信息
 message TeamTechInfo{
+  // 天赋的持有者实体id
   uint64 entityId = 1;
+  // 领主等级
   int32 lordLevel = 2;
+  // 当前已经学习的天赋等级列表（学习天赋后，其对应的等级将被存入此列表用作标记）
   repeated int32 hexTech = 3;
+  // 当前尚未学习的天赋等级列表（领主拥有指定等级的天赋点后可以选择先不学习，这样的话这个等级的天赋就会被记录在此列表中。后续如果学习了，将会被移出此列表）
   repeated int32 pendingLevel = 4;
+  // 暂时无用
   int64 autoPickTick = 5;
+  // 是否为 天赋:“禁止撤退”
   bool banFlee = 6;
+  // 暂时无用
   int64 startPickTick = 7;
-  int32 restRefreshCount = 8;
 }
 
+// 玩家天赋变更通知（领主等级提升时会获得一点天赋点，可以用于学习天赋能力）
 message MsgTeamTechNotify{
+  // 天赋信息
   TeamTechInfo teamTechInfo = 1;
 }
 
@@ -301,7 +329,6 @@ message MsgFlyCannonUseFinishNotify{
 message MsgHexTechChoiceReq{
   uint64 entityId = 2;
   int32 level = 3;
-  bool isRepick = 4;
 }
 
 message MsgHexTechChoiceRsp{
@@ -320,11 +347,17 @@ message MsgHexTechChoiceSelectRsp{
 }
 
 enum ETeam{
+  // 默认队伍（野队、无归属的建筑等...都属于这队）
   Team_None = 0;
+  // 玩家队伍1
   Team1 = 1;
+  // 玩家队伍2
   Team2 = 2;
+  // 玩家队伍3
   Team3 = 3;
+  // 玩家队伍4
   Team4 = 4;
+  // 不存在的队伍，仅做合法性检测时使用
   Max = 5;
 }
 
@@ -362,20 +395,30 @@ message EnemyPlayerPawnInfo{
 }
 
 message CrystalRingInfo{
+  // 城池对应的实体Id
   uint64 entityId = 1;
+  // 城池当前的环数（对应类MOBA的内塔保护机制，在外塔未被推掉前无法攻击内塔）
   int32 maxRing = 2;
 }
 
+// 城池环数变更通知
 message MsgCrystalRingNotify{
+  // 城池环数变更数据
   CrystalRingInfo ringInfo = 1;
 }
 
 enum VisionType{
+  // 普通侦查
   BaseScout = 0;
+  // 普通隐蔽
   BaseHide = 1;
+  // 进草丛导致的隐蔽
   GrassHide = 2;
+  // 黑暗漫游（一个领主技能）导致的隐蔽
   DarkWandererHide = 3;
+  // 埋伏导致的隐蔽
   AmbushHide = 4;
+  // 隐身伞（一个领主技能）导致的隐蔽
   StealthUmbrellaHide = 5;
 }
 
@@ -390,16 +433,31 @@ message MsgPlayerReviveNotify{
   int64 buySquadCdEndTime = 3;
 }
 
+// ***视野信息变更通知
 message MsgVisionInfoNotify{
+  // 视野变更的实体id
   uint64 entityId = 1;
+  // 变更的视野信息
   repeated VisionInfo visionInfos = 2;
 }
 
+// 视野变更信息
+// 每一个视野属性都由两部分组成: 1. 视野范围: range（譬如半径0-1.5范围内）; 2. 视野等级: level
+// 对于每个单位，其都有两个视野属性相关的集合: 1. 侦查视野集合: scoutVisionSet; 2. 隐蔽视野集合: hideVisionSet
+// 假设有a, b两个单位，只有当a的“有效”最大侦查视野等级大于等于b的“有效”最大隐蔽视野等级时，b对a才是可见的。
+// 即：当以下判定通过时，b对a才是可见。下列公式中的dis = Vector3.Distance(a.Position, b.Position)
+// a.scoutVisionSet.Where(s => (dis >= s.range.Min && dis <= s.range.Max)).Max(scoutVision => scoutVision.level) >= 
+// b.hideVisionSet.Where(h => (dis >= h.range.Min && dis <= h.range.Max)).Max(hideVision => hideVision.level)
 message VisionInfo{
+  // 视野距离[d1, d2, d3, d4, -1], 一个数组, 每个值表示一个距离值, 最后一个值-1为可选, 表示无穷远
   repeated float unitDistance = 1;
+  // 视野等级[l1, l2, l3], 一个数组,数量永远为unitDistance的数量-1,表示在两个距离之间的等级,比如d1-d2距离之间的等级为l1
   repeated int32 level = 2;
+  // 是否是移除视野
   bool isRemove = 3;
+  // 是否为侦查视野
   bool isScout = 4;
+  // 视野类型
   VisionType visionType = 5;
 }
 
@@ -427,18 +485,30 @@ enum ETipMsgType{
 
 enum EntityState{
   EntityState_None = 0;
+  // 普通状态
   Normal = 1;
+  // 战斗中
   Fighting = 2;
+  // 死亡
   Dead = 3;
+  // 历史遗留的状态, 玩家死亡后先进入这个状态
   NeedSetOnMap = 4;
-  Loading = 5; // 读条
+  // 读条
+  Loading = 5;
+  // 埋伏
   Ambush = 6;
+  // 暂时无用
   Fly = 7;
+  // 暂时无用
   CannotFight = 8;
+  // 待销毁
   Destroy = 9;
-  SprintHead = 10; // 霓冲刺车头
-  SprintFollower = 11; // 霓冲刺带人
-  Garrison = 12; //驻扎
+  // 霓冲刺 车头
+  SprintHead = 10;
+  // 霓冲刺 带人
+  SprintFollower = 11;
+  // 驻扎
+  Garrison = 12;
 }
 
 message MsgTerritoryNotify{
@@ -542,8 +612,13 @@ message MsgChooseLordNotify{
   int64 endSelectLordTime = 3;
 }
 
+// 领主战斗单元信息
+// 领主：棋盘格上受玩家控制，能够移动走格子，有模型表现的单元
+// 战斗单元：领主触发战斗后，真正执行战斗的对象（即背包中可以配置上阵的单位）
 message LordPawnInfo{
+  // 战斗单元的tid（对应CSVPawn.Id）
   uint32 pawnId = 1;
+  // 领主触发战斗后，此战斗单元被生成的战场位置标记
   int32 solt = 2;
 }
 
@@ -558,46 +633,78 @@ message MsgSelectLordNotify{
 }
 
 message EntityChange {
+  // true: 添加Entity; false: 移除Entity
   bool isAdd = 1;
+  // 增/删 的EntityId
   uint64 entityId = 2;
+  // 增/删 的Entity类型，对应EEntityType
   int32 entityType = 3;
 }
 
+
+// 实体改变通知
+// 通知时机
+// -1. 游戏状态发生改变时
+// -2. 游戏内Entity 增/删 时（譬如加载完成后）
 message MsgEntityNotify {
+  // 实体改变（增/减）列表
   repeated EntityChange changeList = 2;
 }
 
+// 游戏状态改变通知
 message MsgGameStateNotify {
+  // 状态改变的起始时刻
   int64 stateStartTicks = 1;
+  // 变化为的状态（对应EGameState）
   int32 state = 2;
 }
 
+// 资源信息
 message ResourceInfo{
+  // 持有者的实体id
   uint64 entityId = 1;
+  // 当前金币数
   int32 coin = 2;
+  // 当前领主经验值
   int32 food = 3;
+  // 人口数（上阵可战斗单元将会消耗人口）
   int32 cost = 4;
+  // 数据统计用
   int32 coinGain = 5;
+  // 数据统计用
   int32 foodGain = 6;
+  // 数据统计用
   int32 accCoin = 7;
 }
 
+// 资源信息同步消息
 message MsgResourceNotify {
+  // 资源信息
   ResourceInfo resourceInfo = 1;
 }
 
+// 单个背包物品信息
+// 战斗单元在未进入战斗前，会被视为玩家背包中的一个物品存在
 message BagItemData{
+  // 物品tid（依据此物品的类型可能对应 CSVPawn.Id 或 CSVFragment.Id）
   uint32 dataId = 1;
+  // 数量
   int32 count = 2;
+  // 此物品的实体id（只有当其是pawn时才会有此id值）
   uint64 entityId = 3;
 }
+
+// 指定领主的背包物品信息
 message BagInfo{
+  // 领主的实体id
   uint64 entityId = 1;
+  // 背包物品信息
   repeated BagItemData items = 2;
 }
 message MsgBagRsp{
 }
 
+// 玩家背包数据同步消息
 message MsgBagNotify{
   BagInfo bagInfo = 1;
 }
@@ -616,12 +723,19 @@ message MsgBagReq {
   BagCommand command = 6;
 }
 
+// 血量信息
 message HpInfo{
+  // 实体id
   uint64 entityId = 1;
+  // 当前血量
   float hp = 2;
+  // 最大血量
   float maxHp = 3;
 }
+
+// ***血量变更通知
 message MsgHpNotify {
+  // 血量信息
   HpInfo hpInfo = 1;
 }
 
@@ -634,13 +748,23 @@ message TeamInfo{
   uint64 homeCrystalId = 6;
 }
 
+// 队伍状态改变通知，玩家状态改变时通知。目前为EGameState.WaitingPlayer后通知
 message MsgTeamNotify{
+  // 所有队伍信息
   repeated TeamInfo teamInfos = 1;
 }
 
+// 队伍“真家”改变通知
+// 每一个队伍可能拥有多个“水晶”，当某个队伍拥有多个“水晶”时，其中只有一个会是被攻占后直接判定其所属小队失败的。我们称这样的“水晶”为“真家”
+// 接受时机：
+// -1. 对局刚开始，己方水晶创建后
+// -2. 攻占了敌方的“真家”，并选择“迁都”后
 message MsgTeamHomeChangeNotify{
+  // “真家”所属的队伍实体id
   uint64 entityId = 1;
+  // “真家”所在的地格下标
   int32 homeGridIdx = 2;
+  // “真家”对应的建筑id
   uint64 castleId = 3;
 }
 
@@ -648,26 +772,41 @@ message MsgGameOverNotify{
   repeated ETeam rankedTeams = 1;
 }
 
+// 待购买列表变更操作类型
 enum PendingItemCommand{
+  // 购买
   Item_Buy = 0;
+  // 添加
   Item_Add = 1;
+  // 刷新待购买列表
   Item_Refresh = 2;
+  // 快速购买（自动执行“刷新待购买列表”，并“购买”所有需要的卡牌。直至没钱）
   Quick_Buy = 3;
 }
 
+// 待购买列表的物品数据
 message PendingItemData{
+  // 数据下标
   int32 index = 1;
+  // 数据的tid（对应CSVFragment.Id）
   uint32 dataId = 2;
+  // 物品的数量
   int32 count = 3;
+  // 购买的金币消耗量
   int32 coin = 4;
+  // 是否已售出
   bool soldOut = 5;
 }
 
 message MsgPendingItemRsp{
 }
 
+// 待购买列表信息变更通知
+// 待购买列表类似一个小型卡牌商店，玩家可以在这个列表中选择想要购买的卡牌购入，或者付费刷新此列表
 message MsgPendingItemNotify{
+  // 变更的待购买列表信息
   repeated PendingItemData items = 1;
+  // 变更操作的类型
   PendingItemCommand commandId = 2;
 }
 
@@ -695,41 +834,65 @@ message MsgManageCastleRsp
 }
 
 message CastleInfo{
+  // 建筑对应的实体Id
   uint64 entityId = 1;
+  // 建筑对应的建筑Id
   uint32 castleId = 2;
+  // 建筑所属的队伍实体Id
   uint64 ownerId = 3;
 }
 
+// 建筑信息改变通知（可能是 创建/移除/改变）
 message MsgCastleNotify{
+  // 所有改变了的建筑信息
   repeated CastleInfo infos = 1;
 }
 
+// 通知建筑所属的队伍 建筑信息变动
 message MsgCastleOwnerNotify{
+  // 建筑所属的队伍实体Id
   uint64 entityId = 1;
+  // 产生变动的建筑实体Id
   repeated uint64 castleIds = 2;
 }
 
+// 领主信息同步消息
 message MsgLordNotify{
   repeated LordSyncInfo lordInfos = 2;
 }
 
+// 场域信息
+// 场域：即棋盘格中指定规则的格子组成的一块区域。与常规概念下的“触发区域类似”，只是它是由离散的格子组成的
+// 用于处理与范围相关的功能逻辑。它能够拥有可见的模型/特效表现，也可以是没有表现部分的纯逻辑单元
 message FieldInfo{
+  // 场域对应的实体id
   uint64 entityId = 1;
+  // 场域的tid（对应CSVField.Id）
   uint32 fieldId = 2;
+  // 所属的队伍id
   ETeam teamId = 3;
+  // 其持有者的实体id（通常场域都被某个Player Entity所持有）
   uint64 ownerEntityId = 4;
+  // 用户自定义数据（对于不同的场域实现，此字段对应的含义也不相同）
   repeated float customData = 5;
 }
 
 message MsgFieldNotify{
+  // 收到的场域信息
   repeated FieldInfo infos = 1;
 }
 
+// 领主数据同步消息
 message LordSyncInfo{
+  // 领主实体id
   uint64 entityId = 1;
+  // 领主id（对应CSVLord.Id）
   int32 lordId = 2;
+  // 皮肤id（对应CSVGSLordSkin.ItemID）
   int32 skinId = 3;
+  // 领主技能id（对应CSVSkill.Id）
   uint32 skillId = 4;
+  // 初始阵容信息
   repeated LordPawnInfo initFormation = 5;
 }
 
@@ -745,72 +908,117 @@ message Forward{
   int32 z = 3;
 }
 
+// 状态信息（主要是位置、单位状态）
 message PhysicsInfo{
+  // 所属的实体id
   uint64 entityId = 1;
+  // 在棋盘格上的位置
   Position position = 2;
+  // 在棋盘格上的朝向
   Forward forward = 3;
+  // 当前的位置变动是否是由传送导致的
   bool isTeleport = 4;
+  // 
   EntityState state = 5;
+  // 
   int64 stateChangeTime = 6;
+  // 
   int64 stateEndTime = 7;
+  // 
   repeated EntityState stateChangeList = 8;
 }
 
+// ***核心状态信息通知
 message MsgPhysicsNotify{
+  // 状态信息
   repeated PhysicsInfo physicsInfos = 2;
 }
 
-
+// 野队信息（在游戏中，“野队”是类似于玩家操控的“领主”一样的存在。它在棋盘格中拥有一个自己的模型表现，并能够在触碰到后与之进入一场战斗）
 message SquadInfo{
+  // 野队的实体Id
   uint64 entityId = 1;
+  // 野队的tid（对应CSVSquad.Id）
   uint32 squadId = 2;
+  // 暂时无用
   uint64 ownerPlayerId = 3;
+  // 战胜此野队后所能获得的奖励buff tid列表（对应CSVBuff.Id）
   repeated uint32 fightRewardBuffs = 4;
 }
 
+// 野队信息通知
 message MsgSquadNotify{
+  // 所有收到的需要更新的野队信息
   repeated SquadInfo squadInfos = 1;
 }
 
+// 地格功能实体信息
+// “地格功能实体”是一种应用于棋盘格上，为了辅助实现某些棋盘格功能而存在的实体
 message GridPropInfo{
+  // 其对应的实体id
   uint64 entityId = 1;
+  // 其对应的tid（对应CSVGridProp.Id）
   uint32 dataId = 2;
+  // 持有它的玩家playerId（如果有持有者的话）
   uint64 playerId = 3;
+  // 共享视野半径（在此视野范围内其它队伍将会获得无视战争迷雾的视野）
   int32 overrideVisionSize = 5;
+  // 当下是否可用（有的“地格功能实体”拥有被使用的能力）
   bool disableUse = 6;
+  // 其被创建的时刻（有的“地格功能实体”可能存在生命周期）
   int64 timeCreate = 7;
+  // 与“timeCreate”相配套，服务于其存在的生命周期
   int64 timeExpectedChange = 8;
+  // 暂时无用
   int32 period = 9;
+  // 其归属的队伍实体id
   uint64 teamEttId = 10;
 }
 
+// 地格功能实体信息改变通知
 message MsgGridPropNotify{
+  // 收到的所有发生改变的地格功能实体信息列表
   repeated GridPropInfo gridPropInfos = 1;
 }
 
+// 通知野队的归属者 野队所属信息发生变动
 message MsgSquadOwnerNotify{
+  // 野队所属的队伍实体Id
   uint64 entityId = 1;
+  // 产生变动的野队实体Id
   repeated uint64 squadIds = 2;
 }
 
+// 战斗单元信息
 message PawnInfo{
+  // 此战斗单元的实体id
   uint64 entityId = 1;
+  // 此战斗单元的tid（对应CSVPawn.Id）
   uint32 dataId = 2;
+  // 持有此战斗单元的 野队/领主 实体id
   uint64 squadId = 3;
 }
 
+// 战斗单元信息通知
 message MsgPawnNotify{
+  // 战斗单元信息
   repeated PawnInfo pawnInfos = 1;
 }
 
+// 战斗单元信息
 message MsgPawnSoltInfo
 {
+  // 此战斗单元在战斗格上的位置标记
   int32 solt = 1;
+  // 此战斗单元的tid（对应CSVPawn.Id）
   uint64 pawnId = 2;
 }
 
+// 通知战斗单元持有者战斗单元数据
 message MsgPawnsOwnerNotify{
+  // 战斗单元持有者的实体id
   uint64 entityId = 1;
+  // 此持有者持有的所有战斗单元信息
   repeated MsgPawnSoltInfo pawns = 2;
 }
 
@@ -860,59 +1068,106 @@ message MsgOrderSquadRsp
   OrderSquadCommand command = 1;
 }
 
+// ap信息
+// ap: 骰子数。一个骰子数可以执行一次投骰子。
+// rp: 移动点数。投一次骰子，其投出的点数即算入玩家当前的剩余可移动点数
 message ApInfo{
+  // 此信息的持有者实体id
   uint64 entityId = 1;
+  // 最大可囤积的骰子数
   int32 maxAp = 2;
+  // 当前持有的骰子数
   int32 currentAp = 3;
+  // 剩余的移动点数
   int32 restRp = 4;
+  // 
   bool canAttack = 5;
+  // 
   bool movable = 6;
+  // 
   bool canTeleport = 7;
+  // 
   bool hasRush = 8;
+  // 
   bool canScout = 9;
+  // 
   bool canAmbush = 10;
+  // 
   int64 nextApTick = 11;
+  // 可投出的最小移动点数（每次投骰子，最小值不会小于此值）
   int32 minRp = 12;
+  // 可投出的最大移动点数（每次投骰子，最大值不会大于此值）
   int32 maxRp = 13;
+  // 获得一个骰子的间隔时间
   float apInterval = 14;
 }
 
+// ap数据变更通知
 message MsgApNotify{
+  // ap数据
   ApInfo apInfo = 1;
 }
+
+/*
+	已废弃
+*/
 message DpInfo{
-  uint64 entityId = 1;
-  int32 currentDp = 2;
-  int32 maxDp = 3;
+  uint64 entityId = 1;	// 玩家实体id
+  int32 currentDp = 2;	// 当前骰子数
+  int32 maxDp = 3;		// 最高骰子数
 }
+
+/*
+	已废弃消息
+*/
 message MsgDpNotify{
   DpInfo dpInfo = 1;
 }
 
+// ***路径改变通知
+// 棋盘格中的单位要移动，首先要先生成一个可移动路径，然后才会开始移动
 message MsgPathNotify{
+  // 路径数据的持有者实体id
   uint64 entityId = 1;
+  // 路径信息
   PathInfo pathInfo = 2;
 }
 
+// 路径信息
 message PathInfo{
+  // 移动类型（对应EPathMoveType。包含{Normal: 按照事先排好的地格列表寻路, Direction: 按照某个特定的方向寻路}）
   int32 moveType = 2;
+  // Normal类型下的路径地格下标列表
   repeated int32 path = 3;
+  // Direction类型下的X轴数据
   float dirX = 4;
+  // Direction类型下的Z轴数据
   float dirZ = 5;
+  // 后端的移动速度
   float modelAcc = 6;
+  // 抵达路径终点后的行为（对应EPathGoalBehavior。包含{None: 什么都不干, Attack: 攻击, Push: 移动过程中撞到地方单位不进战（原地停止）}）
   int32 afterGoalBehavior = 7;
 }
 
+// buff数据
 message BuffData{
+  // buffTid（对应CSVBuff.Id）
   uint32 buffId = 1;
+  // buff移除的时刻
   int64 buffEndTime = 2;
+  // 配置参数（CSVBuff表中formatParams列配置的数据）
   repeated float param = 3;
+  // 特定功能buff的额外数据（目前用作堆叠数）
   repeated float details = 4;
 }
 
+// buff同步消息
 message MsgBuffNotify{
+  // 所属的实体id
   uint64 entityId = 2;
+  // buff数据列表
   repeated BuffData buffList = 3;
+  // 移除的buffTid列表（对应CSVBuff.Id）
   repeated uint32 canceledList = 4;
 }
 
@@ -948,17 +1203,26 @@ message MsgSkillResultNotify{
   int32 index = 5;
 }
 
+// 技能数据
 message SkillData{
+  // 持有者的实体id
   uint64 entityId = 1;
+  // 技能类型
   uint32 buffType = 2;
+  // 技能的tid（对应CSVSkill.Id）
   uint32 dataId = 3;
+  // 冷却完毕的时刻
   int64 coolDownEndTime = 4;
+  // 已使用的次数
   int32 usedCount = 5;
+  // 
   int32 stackCount = 6;
+  // 技能阶段（有的技能可能有多个阶段，譬如读条阶段，持续释放阶段等）
   int32 skillPhase = 7;
   int64 availableEndTime = 8;
   int64 durationEndTime = 9;
   float customData = 10;
+  // 当前技能在持有者技能列表中的下标
   int32 skillIndex = 11;
 }
 
@@ -968,6 +1232,7 @@ message MsgSkillSyncRsp{
   uint64 targetEntity = 3;  // 技能选中的目标
 }
 
+// 技能数据变更通知
 message MsgSkillSyncNotify{
   repeated SkillData skillData = 1;
 }
@@ -1139,18 +1404,23 @@ message MsgBattleMapControlRsp
 {
 }
 
-
+/*
+战斗单位信息
+*/
 message MsgBattleUnitInfo{
-  uint64 entityId = 1;
-  uint32 battleUnitDataId = 2;
-  Position position = 3;
-  uint64 battleMap = 4;
-  uint64 ownerId = 5;
-  int32 teamId = 6;
-  uint32 originPawn = 7;
-  bool isAdditional = 8;
+  uint64 entityId = 1;				//战斗单位实体id
+  uint32 battleUnitDataId = 2;		//战斗单位数据id
+  Position position = 3;			//小常常位置
+  uint64 battleMap = 4;				//小战场id
+  uint64 ownerId = 5;				//拥有者id
+  int32 teamId = 6;					//拥有者team
+  uint32 originPawn = 7;			//原始pawn
+  bool isAdditional = 8;			//是否是额外的
 }
 
+/*
+	复数战斗单位信息通知
+*/
 message MsgBattleUnitNotify{
   repeated MsgBattleUnitInfo infos = 1;
 }
@@ -1168,27 +1438,54 @@ message MsgBattleCreationAddNotify{
   repeated MsgBattleCreationInfo infos = 1;
 }
 
+// 入战方位
+// 对于每一个进入战斗的队伍而言，它们都需要确定一个入战方位。这个入战方位将会确定它们最终将会被生成在哪里
+// 每一个战斗战场都有留个战斗方位，它们分别是下面的这几个
+// 假设a是进攻方，d是防守方，s是d的队友。a向d发起了一场战斗,然后s从这个战场周围任意一格进入支援这场战斗，s对应的入战方位大体如下
+// 其中a的入战方位为(0),d的入战方位为(1)
+// 
+// (4)(4)(4)
+// (2)(d)(3)
+// (2)(a)(3)
+// (5)(5)(5)
 enum CoreBattleMapPosition{
+  // 攻击方
   Attacker = 0;
+  // 防守方
   Defender = 1;
+  // 左侧支援
   SupporterLeft = 2;
+  // 右侧支援
   SupporterRight = 3;
+  // 上方支援
   SupporterUp = 4;
+  // 下方支援
   SupporterDown = 5;
 }
 
+// 加入战斗的玩家信息
 message MsgBattleMapJoinedInfo{
+  // 加入战斗的领主实体id
   uint64 joinedEntityId = 1;
+  // 加入战斗的方位
   CoreBattleMapPosition mapPosition = 2;
+  // 加入战斗的时刻
   uint64 joinedTime = 3;
+  // 当前的总hp
   uint32 totalHp = 4;
+  // 埋伏类型
   AmbushType ambushType = 5;
 }
 
+// 埋伏类型
 enum AmbushType{
+  // 被埋伏
   IsAmbushed = 0;
+  // 主动埋伏中
   Ambushing = 1;
+  // 加入埋伏的对战
   JoinAmbush = 2;
+  // 无埋伏
   NoAmbush = 3;
 }
 
@@ -1199,8 +1496,11 @@ message RedDotNotifyData{
   bool hasCertified = 4;
 }
 
+// 加入战斗的队伍信息
 message MsgBattleMapTeamPlayers{
+  // 队伍id
   ETeam teamId = 1;
+  // 当前队伍下的玩家领主实体id
   repeated uint64 players = 2;
 }
 
@@ -1208,23 +1508,30 @@ message MsgBattleMapFleeFinishNotify{
   uint64 entityId = 1;
 }
 
+///重要消息 通知战斗结果
 message MsgBattleMapResultNotify{
-  uint64 entityId = 1;
-  repeated uint64 restPlayers = 2;
-  repeated uint64 winnerPlayers = 3;
-  repeated uint64 losePlayers = 4;
-  repeated uint64 drawPlayers = 5;
-  uint64 castleId = 6;
-  ETeam winnerTeamId = 7;
-  uint64 endTick = 8;
-  int64 endTimeTick = 9;
+  uint64 entityId = 1;					//通知的战斗实体id
+  repeated uint64 restPlayers = 2;		//战场剩余的玩家	
+  repeated uint64 winnerPlayers = 3;	//获胜的玩家	
+  repeated uint64 losePlayers = 4;		//失败的玩家
+  repeated uint64 drawPlayers = 5;		//战平的玩家	
+  uint64 castleId = 6;					//如果在城堡中战斗 城堡的id 没有即为0
+  ETeam winnerTeamId = 7;				//获胜的队伍id
+  uint64 endTick = 8;					//小战斗开始到结束的时间（从0开始）
+  int64 endTimeTick = 9;				//游戏开始到这场战斗结束的时间（从0开始）
 }
 
+// 战场信息更新通知
 message MsgBattleMapNotify{
+  // 战场实体的id
   uint64 entityId = 1;
+  // 发生战斗的地格下标
   repeated int32 happenedGridIndex = 2;
+  // 对应[Flags]FightType。包含{Pvp: 玩家对抗, CastleFight: 包含建筑的战斗, AmbushFight: 埋伏战斗, OneOnOneFight: 一对一战斗}
   int32 fightType = 3;
+  // 所有加入战斗的玩家信息
   repeated MsgBattleMapJoinedInfo joinedInfos = 4;
+  // 所有加入战斗的队伍信息
   repeated MsgBattleMapTeamPlayers teamPlayers = 5;
 }
 
@@ -1285,20 +1592,27 @@ enum BattleUnitStateType{
 }
 
 enum BattleDmgType{
-  Dmg = 0;
-  Heal = 1;
-  CriticalDmg = 2;
+  Dmg = 0;				//伤害
+  Heal = 1;				//治疗
+  CriticalDmg = 2;		//暴击伤害 
 }
 
+
+/*
+	战斗伤害信息（此消息只是表现型消息 可以不用处理）
+*/
 message MsgBattleDmgInfo {
-  uint64 entityId = 1;
-  uint64 frameTick = 2;
-  BattleDmgType dmgType = 3;
-  uint32 value = 4;
-  uint32 preTaxValue = 5;
-  uint64 attackId = 6;
+  uint64 entityId = 1;			//战斗单位实体id
+  uint64 frameTick = 2;			//帧数
+  BattleDmgType dmgType = 3;	//伤害类型
+  uint32 value = 4;				//具体数值
+  uint32 preTaxValue = 5;		//未计算前的数值
+  uint64 attackId = 6;			//攻击对象实体id（也是战斗内的）
 }
 
+/*
+	复数战斗伤害信息通知
+*/
 message MsgBattleDmgNotify{
   repeated MsgBattleDmgInfo infos = 2;
 }
@@ -1342,13 +1656,21 @@ enum BattleUnitMoveInfoType{
   ToPos = 1;
 }
 
+
+/*
+	战斗单位移动信息
+*/
 message MsgBattleUnitMoveInfo {
-  uint64 entityId = 1;
-  BattleUnitMoveInfoType infoType = 2;
-  int32 nextCellId = 3;
-  Position toPos = 4;
+  uint64 entityId = 1;						//战斗单位实体id
+  BattleUnitMoveInfoType infoType = 2;		//是移动到格子还是移动到位置	
+  int32 nextCellId = 3;						//下一个格子id	
+  Position toPos = 4;						//移动到的位置 (x,y,z)
 }
 
+
+/*
+	复数战斗单位移动信息通知
+*/
 message MsgBattleUnitMoveNotify{
   repeated MsgBattleUnitMoveInfo infos = 2;
 }
@@ -1443,13 +1765,21 @@ message MsgBattleUnitAttributeNotify{
   repeated MsgBattleUnitAttributeInfo battleUnitAttributes = 2;
 }
 
+// 玩家信息
 message PlayerInfo{
+  // 玩家控制的领主EntityId
   uint64 entityId = 1;
+  // 玩家所属的队伍Id
   ETeam teamId = 2;
+  // 暂时无用
   bool isCaptain = 3;
+  // 玩家名
   string playerName = 4;
+  // 玩家Id
   int32 playerId = 5;
+  // userId
   string userId = 6;
+  // 当前的KDA数据
   repeated KDAValue kda = 7;
 }
 
@@ -1677,6 +2007,20 @@ message MsgReconnectInfoNotify{
   repeated MsgBattleHistoryInfoNotify selfBattleHistory = 11;
 }
 
+message MsgReconnectRsp{
+  ReconnectGameContext context = 1;
+  repeated ReconnectTeamInfo teamInfos = 2;
+  repeated ReconnectPlayerInfo playerInfos = 3;
+  repeated ReconnectPawnInfo pawnInfos = 4;
+  repeated ReconnectCastleInfo castleInfos = 5;
+  repeated ReconnectSquadInfo squadInfos = 6;
+  repeated ReconnectGridPropInfo gridPropInfos = 7;
+  repeated ReconnectSelfTeamMemberInfo selfTeamMemberInfo = 8;
+  ReconnectSelfPlayerInfo selfPlayerInfo = 9;
+  repeated ReconnectFieldInfo fieldInfos = 10;
+  repeated MsgBattleHistoryInfoNotify selfBattleHistory = 11;
+}
+
 message MsgInvalidNotify{
 
 }
@@ -1801,27 +2145,6 @@ message PlayerRankInfo
 	int32 Star = 2;
 }
 
-message MsgDisPlayerRankGameInfo
-{
-  /// 当前的段位
-  int32 RankId = 1;
-
-  /// 当前段位的星数
-  int32 Star = 2;
-}
-
-message MsgMatchPlayerDisPlayerInfo
-{
-  /// 头像
-  int32 Head = 1;
-  /// 排位赛信息
-  MsgDisPlayerRankGameInfo RankGameInfo = 2;
-  //MMR分数
-  int32 MMRScore = 3;
-  //修正后的MMR分数
-  int32 FixedMMRScore = 4;
-}
-
 message SeatPlayer{
   string name = 1;
   string id = 2;
@@ -1837,8 +2160,8 @@ message SeatPlayer{
   int32 botTypeId = 12;
   uint32 selectSkill = 13;
   MsgCoreCardDeploySelected coreCardDeploySelected = 14;
-  //int32 MMRScore = 15;
-  MsgMatchPlayerDisPlayerInfo disPlayerInfo = 16; //玩家展示信息
+  int32 MMRScore = 15;
+  PlayerRankInfo RankInfo = 16; // 排位赛信息，只有排位赛设置该字段
 }
 
 enum LoadingType{
@@ -1905,15 +2228,23 @@ message MsgBattleSkillNotify{
   uint32 overrideActiveSkillId = 2;
 }
 
+// 刷怪器信息
 message SpawnerInfo{
+  // 刷怪器的实体id
   uint64 entityId = 1;
+  // 刷怪器对应的tid（对应CSVSpawner.Id）
   uint32 dataId = 2;
+  // 复活时刻（刷怪器可能会间隔一段时间后刷出指定的单位）
   int64 revivalTick = 3;
+  // 要刷出目标单位的地格下标
   int32 targetGridIndex = 4;
+  // 要刷出的目标单位tid（依据刷怪器的类型分别对应 CSVGridProp.Id 或 CSVSquad.Id）
   uint32 targetDataId = 5; 
 }
 
+// 刷怪器信息通知
 message MsgSpawnerSyncNotify{
+  // 收到的所有刷怪器信息
   repeated SpawnerInfo infos = 1;
 }
 

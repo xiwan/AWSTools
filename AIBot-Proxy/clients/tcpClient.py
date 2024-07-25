@@ -4,9 +4,12 @@ import time
 import json
 import queue
 import asyncio
+import progen.python.omni.base_pb2 as base_pb2
+import progen.python.omni.msg_pb2 as msg_pb2
 
 from Core.utils import run_async, decodeLittle, decodeBig, getbyteLitte, singleton, logging, config, routeTable
 from Core.protoKlass import ProtoKlass
+
 
 remoteTcp = config['remoteTcp']
 remoteHttp = config['remoteHttp']
@@ -44,9 +47,10 @@ class TcpConnector(object):
         self.stateQ.put(msg)
 
     def PutSateDictMsg(self, code, msg):
-        if code in self.stateDict:
-            self.stateDict[code].put(msg)
-
+        if not code in self.stateDict:
+            self.stateDict[code] = queue.Queue()
+        self.stateDict[code].put(msg)
+        
     async def FetchMsg(self):
         while True:
             await asyncio.sleep(0.1)
@@ -57,6 +61,18 @@ class TcpConnector(object):
                 logging.info(f"Out queue.Empty")
                 msg = getbyteLitte(0000)    
             logging.info(f'### FetchMsg ### {msg}')
+            return msg
+        
+    async def FetchStateDictMsg(self, code):
+        while True:
+            await asyncio.sleep(0.1)
+            try:
+                msg = self.stateDict[code].get(timeout=0.5)
+                self.stateDict[code].task_done()
+            except queue.Empty:
+                logging.info(f"stateDict queue.Empty")
+                msg = getbyteLitte(0000)
+            logging.info(f'### FetchSateDictMsg ### {msg}')
             return msg
 
     def OnOpen(self):
@@ -94,9 +110,13 @@ class TcpConnector(object):
                     if tcpdata == 1:
                         proto = ProtoKlass()
                         protoData = proto.revPayloadProto(revcdata)
-
+                        code = protoData.protoId
+                        protoName = msg_pb2.BattleProtoIds.Name(code)
                         # protoData = proto.RevHandler(revcdata)
-                        self.PutOutMsg(protoData)
+                        if protoName.lower().endswith('notify'):
+                            self.PutSateDictMsg(code, protoData)
+                        else:
+                            self.PutOutMsg(protoData)
                         logging.info(f"### OnMessage bytes ###: {protoData}")
                     else:
                         self.PutOutMsg(revcdata.decode("utf-8"))
@@ -114,7 +134,7 @@ class TcpConnector(object):
         failed_try = 0
         while True:
             try:
-                logging.info(f"start connect to server: {server_addr}")
+                print(f"start connect to server: {server_addr}")
                 server_addr_array = server_addr.split(":")
                 self.server_addr = (server_addr_array[0], int(server_addr_array[1]))
                 self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

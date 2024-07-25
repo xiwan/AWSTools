@@ -81,6 +81,72 @@ python3 tcpServer.py --host localhost --port 8000
 
 ```
 
+### post following omni apis
+
+* omni-host:8100/action - for game management
+```
+# example request
+{
+	"Command": "CreateBattle",
+	"Data": "{\"awsSBattleSquands\":[{\"Players\":[{\"ConnectToken\":\"\",\"RoleId\":1,\"BotDifficulty\":0,\"LordId\":1,\"SkillId\":1},{\"ConnectToken\":\"\",\"RoleId\":2,\"BotDifficulty\":0,\"LordId\":1,\"SkillId\":1}],\"SquadIndex\":1},{\"Players\":[{\"ConnectToken\":\"\",\"RoleId\":3,\"BotDifficulty\":1001,\"LordId\":1,\"SkillId\":1},{\"ConnectToken\":\"\",\"RoleId\":4,\"BotDifficulty\":1001,\"LordId\":1,\"SkillId\":1}],\"SquadIndex\":3}]}"
+}
+
+# example response
+{
+    "Command": "CreateBattle",
+    "ErrorCode": 0,
+    "ErrorMessage": "OK",
+    "Data": "{\"BattleId\":\"212133373961961472\",\"AWSBattlePlayers\":[{\"ConnectToken\":\"1207828474\",\"RoleId\":1,\"BotDifficulty\":0,\"LordId\":1,\"SkillId\":0},{\"ConnectToken\":\"1803525043\",\"RoleId\":2,\"BotDifficulty\":0,\"LordId\":1,\"SkillId\":0}]}"
+}
+```
+
+* omni-proxy-host:5000/omni - for battle server
+
+```
+# example request
+{
+    "protoId": "Connect_Req",
+    "data": {
+        "battleId": "212133373961961472", # BattleId
+        "onlyTcp": true,
+        "connectId": "1", # RoleId
+        "token":"1207828474", # ConnectToken
+        "isReconnect": false
+    }
+}
+# example response
+{
+    "data": {
+        "address": "47.116.76.112",
+        "clientId": 31,
+        "conv": 2113,
+        "port": 16009,
+        "token": "1207828474"
+    },
+    "notifySeqId": "1",
+    "protoId": 5,
+    "responseId": 1
+}
+```
+
+* omni-proxy-host:5000/omni/notify - for battle server notify
+
+```
+# example request
+{
+    "protoId": "GameTime_Notify"
+}
+
+# example response
+{
+    "data": {
+        "serverTimeTicks": "130025701"
+    },
+    "notifySeqId": "3",
+    "protoId": 8
+}
+```
+
 ## how to config
 
 ```
