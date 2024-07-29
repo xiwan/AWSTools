@@ -36,15 +36,20 @@ class ProtoKlass:
         return payload
     
     def revPayloadProto(self, recv_data):
-        all_len = len(recv_data)
-        if all_len < 4:
-            return
-        bin_len = decodeLittle(recv_data[:4])
-        bin = recv_data[4:]
-        print("revPayload", bin_len, bin)
-
+        # all_len = len(recv_data)
+        # if all_len < 4:
+        #     return
+        # bin_len = decodeLittle(recv_data[:4])
+        # bin = recv_data[4:]
+        # if len(bin) < bin_len:
+        #     return
+        # bin = recv_data[4:4+bin_len]
         baseRsp = base_pb2.BaseRsp()
-        self.ParseFromString(baseRsp, bin)
+        self.ParseFromString(baseRsp, recv_data)
+
+        # remainder = recv_data[4+bin_len:]
+        # print("revPayload", bin_len,  baseRsp)
+        # print(baseRsp, remainder)
         return baseRsp
 
     def revPayload(self, recv_data):

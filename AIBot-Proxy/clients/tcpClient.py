@@ -23,6 +23,8 @@ class TcpConnector(object):
         self.server_addr = None
         self.remoteTcp = None
         self.lastState = None
+        self.revcdata = b''
+        self.remainder = b''
         self.inQ = queue.Queue() # request message queue
         self.outQ = queue.Queue() # response message queue
         self.stateQ = queue.Queue() # state messsage queue
@@ -98,31 +100,73 @@ class TcpConnector(object):
                 time.sleep(1)
 
     def OnMessage(self):
+        HEADER_SIZE = 4
         failed_try = 0
         while True:
             try:
-                revcdata = self.tcp_socket.recv(1024)
-                if len(revcdata) == 0:
-                    self.Close()
-                    return
-                if isinstance(revcdata, bytes):
-                    # msg = revcdata.decode(encoding='utf-8')
-                    if tcpdata == 1:
-                        proto = ProtoKlass()
-                        protoData = proto.revPayloadProto(revcdata)
-                        code = protoData.protoId
-                        protoName = msg_pb2.BattleProtoIds.Name(code)
-                        # protoData = proto.RevHandler(revcdata)
-                        if protoName.lower().endswith('notify'):
-                            self.PutSateDictMsg(code, protoData)
-                        else:
-                            self.PutOutMsg(protoData)
-                        logging.info(f"### OnMessage bytes ###: {protoData}")
-                    else:
-                        self.PutOutMsg(revcdata.decode("utf-8"))
-                elif isinstance(revcdata, str):
-                    self.PutOutMsg(revcdata)
-                    logging.info(f"### OnMessage str ###: {revcdata}")
+                header = b""
+                while len(header) < HEADER_SIZE:
+                    chunk = self.tcp_socket.recv(HEADER_SIZE)
+                    if not chunk:
+                        self.Close()
+                        return
+                    header += chunk
+                payload_length = decodeLittle(header)
+                
+                payload = b""
+                while len(payload) < payload_length:
+                    chunk = self.tcp_socket.recv(payload_length - len(payload))
+                    if not chunk:
+                        self.Close()
+                        return
+                    payload += chunk
+
+                proto = ProtoKlass()
+                protoData = proto.revPayloadProto(payload)
+                if protoData == None:
+                    break
+
+                code = protoData.protoId
+                protoName = msg_pb2.BattleProtoIds.Name(code)
+                if protoName.lower().endswith('notify'):
+                    self.PutSateDictMsg(code, protoData)
+                else:
+                    self.PutOutMsg(protoData)
+
+                # print("revPayloadProto", protoData)
+                logging.info(f"### OnMessage bytes ###: {protoData}")
+                pass
+
+                # self.revcdata += self.tcp_socket.recv(1024)
+                # print("------------------")
+                # print(self.revcdata)
+                # print("------------------")
+                # if len(self.revcdata) == 0:
+                #     break
+                #     # self.Close()
+                #     # return
+                # if isinstance(self.revcdata, bytes):
+                #     # msg = revcdata.decode(encoding='utf-8')
+                #     if tcpdata == 1:
+                #         proto = ProtoKlass()
+                #         protoData, self.remainder = proto.revPayloadProto(self.revcdata)
+                #         if protoData == None:
+                #             break;
+                #         code = protoData.protoId
+                #         protoName = msg_pb2.BattleProtoIds.Name(code)
+                #         # protoData = proto.RevHandler(revcdata)
+                #         if protoName.lower().endswith('notify'):
+                #             self.PutSateDictMsg(code, protoData)
+                #         else:
+                #             self.PutOutMsg(protoData)
+                #         self.revcdata = self.remainder
+                #         print(len(self.revcdata))
+                #         logging.info(f"### OnMessage bytes ###: {protoData}")
+                #     else:
+                #         self.PutOutMsg(self.revcdata.decode("utf-8"))
+                # elif isinstance(self.revcdata, str):
+                #     self.PutOutMsg(self.revcdata)
+                #     logging.info(f"### OnMessage str ###: {self.revcdata}")
             except Exception as e:
                 logging.info(f"### TcpConnector OnMessage ### socket.error: {e}")
                 failed_try += 1

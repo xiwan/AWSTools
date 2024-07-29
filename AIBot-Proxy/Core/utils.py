@@ -14,8 +14,8 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from configparser import ConfigParser
 
 cfg = ConfigParser()
-# cfg.read("./config/env.local.ini")
-cfg.read("./config/env.omni.prd.ini")
+#cfg.read("./config/env.omni.prd.ini")
+cfg.read("./config/env.omni.docker.ini")
 
 config = cfg['config']
 routeTable = cfg['route']
