@@ -24,6 +24,11 @@ proto is a faster serilization/deserilization method comparing to json/txt forma
 
 ![proto](./images/protoc.png "proto")
 
+```
+protoc --proto_path=src --python_out=build/gen src/foo.proto src/bar/baz.proto
+```
+
+
 ## How to start
 
 ### a testing websocket server (serve json response) port: 8765

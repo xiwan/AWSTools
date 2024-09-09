@@ -199,10 +199,26 @@ enum BattleProtoIds {
   SkillPrepare_Notify = 170;
   Reconnect_Req = 171;
   Reconnect_Rsp = 172;
+  TryFindPathFromTo_Req = 173;
+  TryFindPathFromTo_Rsp = 174;
 
   Test_Req = 9998;
   Test_Rsp = 9999;
 } //
+
+
+message MsgTryFindPathFromToReq{
+  int32 fromGridIdx = 1;
+  int32 toGridIdx = 2;
+  int32 maxStep = 3;
+}
+
+message MsgTryFindPathFromToRsp{
+  repeated int32 path = 1;
+}
+
+
+
 // WinnerScore_Notify = 101; // 老版战略分协议, 策划说先注释
 message MsgReconnectReq{
   string info = 1;
@@ -279,8 +295,22 @@ message MsgResetGridSelectNotify{
   PathInfo pathInfo = 1;
 }
 
+// 移动/攻击 请求
+// 移动与攻击，大体上都是传递一个路径与目标点给后端，从而开启后续逻辑。但是对应两种不同的模式，参数的配置逻辑略有不同
+// 
+// 假设初始路径p为: [a, 1, 2, 3, b], 是一条棋盘格上的有效路径，此时玩家在a点上。
+// - 
+// - 当我们希望玩家移动到b点时，我们传递的path为: [a, 1, 2, 3, b, -1], 即p.Add(-1)
+// - toGridIdx为: b，即p[^1]
+// - 
+// - 当我们希望玩家攻击b点上的敌方单位时（此时b点上必须要有敌方单位），我们传递的path为：[a, 1, 2, 3, b]，即p本身
+// - toGridIdx为：3，即p[^2]
+// - 
+// 相当于，最终传到服务器的路径，将会把路径的最后一位视为攻击格，倒数第二位视为真正的移动终点格。
 message MsgPlayerMoveAttackReq{
-  repeated int32 path = 1;		
+  // 路径下标列表
+  repeated int32 path = 1;
+  // 目标点下标
   int32 toGridIdx = 2;			
 }
 
@@ -326,19 +356,31 @@ message MsgFlyCannonUseFinishNotify{
   uint64 cannonCastleId = 2;
 }
 
+// 请求选择某个等级的天赋（当前领主的待选天赋等级列表不为空时即可发起此请求。待选天赋等级列表对应TeamTechInfo.pendingLevel）
+// 发起这个请求后，如果对应的等级下确实存在尚未学习的天赋点，则会返回MsgHexTechChoiceRsp。
+// 相当于这个请求只是申请一个可选的天赋列表，待天赋列表确定了之后，还需要再发一个具体的天赋选择请求：MsgHexTechChoiceSelectReq才能完成一个天赋的获取。
 message MsgHexTechChoiceReq{
+  // 玩家控制的领主实体id
   uint64 entityId = 2;
+  // 要选择天赋的等级（TeamTechInfo.pendingLevel列表中存的就是尚未学习天赋的等级）
   int32 level = 3;
 }
 
+// MsgHexTechChoiceReq的回包
 message MsgHexTechChoiceRsp{
+  // 待选的天赋列表等级
   int32 level = 2;
+  // 此等级下可选的天赋tid列表
   repeated int32 hexTech = 3;
 }
 
+// 天赋选择请求
 message MsgHexTechChoiceSelectReq{
+  // 玩家控制的领主实体id
   uint64 entityId = 2;
+  // 要选择天赋的等级（对应MsgHexTechChoiceRsp返回的等级）
   int32 level = 3;
+  // 要选择的天赋的tid（对应MsgHexTechChoiceRsp.hexTech 列表中想要选择的那个天赋的值）（天赋tid对应CSVSpecialEffect.ID）
   int32 hexTech = 4;
 }
 
@@ -715,11 +757,17 @@ enum BagCommand
   Pawn_Sell = 1;  //卖 英雄及其碎片
 }
 
+// 出售卡牌请求
 message MsgBagReq {
+  // 战斗单元的tid（对应CSVPawn.Id）
   uint32 dataId = 2;
+  // 出售的战斗单元个数（目前同种卡牌无法叠加，所以这个字段永远默认设1就行）
   int32 count = 3;
+  // 出售的这个战斗单元的实体id（对应 BagItemData 同步下来的数据）
   uint64 entityId = 4;
+  // 通过MsgPlayerCommandNotify同步到的当前指令次数
   int32 commandCount = 5;
+  // 出售指令类型（当前版本已经从用户层面移除了碎片的概念，因此这个指令只会发出BagCommand.Pawn_Sell类型的操作）
   BagCommand command = 6;
 }
 
@@ -780,7 +828,7 @@ enum PendingItemCommand{
   Item_Add = 1;
   // 刷新待购买列表
   Item_Refresh = 2;
-  // 快速购买（自动执行“刷新待购买列表”，并“购买”所有需要的卡牌。直至没钱）
+  // 快速购买（自动执行“刷新待购买列表”，并“购买”所有需要的卡牌，直至没钱。相当于一键把当前剩余的钱全花光。）
   Quick_Buy = 3;
 }
 
@@ -810,9 +858,13 @@ message MsgPendingItemNotify{
   PendingItemCommand commandId = 2;
 }
 
+// 商店刷新请求（当commandId不同时，需要配置的字段也会有所不同）
 message MsgPendingItemReq{
+  // 商店请求类型
   PendingItemCommand commandId = 1;
+  // 购买操作时对应的 要购买的卡牌在商店列表中的下标（从协议上来说可以同时请求购买多个，但是对于真实用户而言，他们只能一个个点击购买）
   repeated int32 itemsIdx = 2;
+  // 通过MsgPlayerCommandNotify同步到的当前指令次数
   int32 commandCount = 3;
 }
 
@@ -1029,10 +1081,21 @@ enum EditSquadCommand{
   ChangeRainbowCard = 4;
 }
 
+// 布阵编辑请求
 message MsgEditSquadReq{
+  // 目前此请求只有 MovePawn 一种类型是实际有使用的，因此此条请求可以看做“阵容调整请求”（包括 上阵、下阵、调整位置）
   EditSquadCommand command = 2;
+  // 被调整的战斗单元的实体id（对应 BagItemData 同步下来的数据: entityId）
   uint64 sourceEntityId = 3;
+  // 持有这个战斗单元的领主实体id（通过BagInfo能够获取到战斗实体与领主的持有关系）
+  // 战斗单元作为BagItemData记录在背包中，背包的持有者BagInfo.entityId即这些战斗单元的持有者（也就是玩家控制的领主）
   uint64 targetEntityId = 4;
+  // 要移动到的沙盘格目标点位。在操作为 上阵、调整位置 时需要填；在操作为 下阵 时无需填
+  // 坐标点位为 从上往下，从左往右，以0为起始值的int值标记。（即打开背包后的布阵格子下标对应关系如下）
+  // x 4 8  ... x
+  // 1 5 9  ... 29
+  // 2 6 10 ... 30
+  // x 7 11 ... x
   int32 targetSlotId = 5;
   int32 commandCount = 6;
 }
@@ -1055,11 +1118,16 @@ enum OrderSquadCommand{
   FlyCannon = 14;
 }
 
+// command: ReRoll
+// - 有效字段只有[command, commandCount]
+// - 包体示例{"command": OrderSquadCommand.ReRoll, "commandCount": 1546}
 message MsgOrderSquadReq{
+  // 目前这个消息只有投骰子一个应用场景
   OrderSquadCommand command = 2;
   uint64 squadEntityId = 3;
   uint64 commandParam = 4;
   repeated int32 extraParams = 5;
+  // 通过MsgPlayerCommandNotify同步到的当前指令次数
   int32 commandCount = 6;
 }
 
@@ -1242,12 +1310,25 @@ message MsgSkillRemoveNotify{
   uint32 skillIndex = 2;
 }
 
+// 发起技能请求
+// 目前的技能大体有两种释放逻辑
+// 1. 选定目标实体进行释放，只需配置targetEntity（譬如鲨鱼的钩子，必须要选定一个敌方领主才能释放）
+// 2. 选定地格进行释放，只需配置targetGridIdx（譬如小狗的传送门，选中的是一个地格，而非领主）
 message MsgSkillSyncReq{
+  // 当前技能在玩家技能槽中的下标（许多功能的底层都是直接通过技能实现的，譬如领主专属技能、回城、侦查...等。对于用户而言，可能最终接入这些技能的入口有多个，而每一个可能的入口则对应一个这样的槽位下标。具体的槽位类型如下：）
+  // Lord = 0, // 领主技能
+  // Common = 1, // 通用技能：回城
+  // Summoner = 2, // 召唤师技能
+  // GunCarrier = 3, // 炮车怪技能
   int32 skillIndex = 1;
+  // 技能的tid（对应CSVSkill.Id）
   uint32 dataId = 2;
-  int32 targetGridIdx = 5;  // 技能选中格子
-  uint64 targetEntity = 6;  // 技能选中的目标
+  // 技能选中格子
+  int32 targetGridIdx = 5;
+  // 技能选中的目标实体id
+  uint64 targetEntity = 6;
   repeated uint64 skillParams = 3;
+  // 通过MsgPlayerCommandNotify同步到的当前指令次数
   int32 commandCount = 4;
 }
 
@@ -1870,7 +1951,9 @@ message MsgParamChatNotify{
   repeated ParamChatContent chatList = 1;
 }
 
+// 玩家指令数同步消息（各种Command请求需要发送此信息，用于验证Command的合法性）
 message MsgPlayerCommandNotify{
+  // 当前生效过的指令次数
   int32 commandCount = 2;
 }
 
@@ -2025,9 +2108,17 @@ message MsgInvalidNotify{
 
 }
 
+// 投降投票请求
+// 投票分为两个部分：1. 发起投票, 2. 投票
+// 对于主动点击投降按钮的人而言，他相当于把这两个部分合并到一起了。即：
+// 1. 发起投票的人通过发这个消息发起投票（并且isStarter设置为true）
+// 2. 投票被发起，其它队友响应后也会通过这个消息执行投票
 message MsgSurrenderReq{
+  // 是否同意投降
   bool agree = 1;
+  // 是否为投票的发起者
   bool isStarter = 2;
+  // 通过MsgPlayerCommandNotify同步到的当前指令次数
   int32 commandCount = 3;
 }
 
