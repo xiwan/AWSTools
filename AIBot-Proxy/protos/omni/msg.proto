@@ -311,11 +311,11 @@ message MsgPlayerMoveAttackReq{
   // 路径下标列表
   repeated int32 path = 1;
   // 目标点下标
-  int32 toGridIdx = 2;			
+  int32 toGridIdx = 2;
 }
 
 message MsgPlayerMoveAttackRsp{
-  
+
 }
 
 // 天赋信息
@@ -1180,9 +1180,9 @@ message MsgApNotify{
 	已废弃
 */
 message DpInfo{
-  uint64 entityId = 1;	// 玩家实体id
-  int32 currentDp = 2;	// 当前骰子数
-  int32 maxDp = 3;		// 最高骰子数
+  uint64 entityId = 1;  // 玩家实体id
+  int32 currentDp = 2;  // 当前骰子数
+  int32 maxDp = 3;    // 最高骰子数
 }
 
 /*
@@ -1350,7 +1350,7 @@ enum PlayerAttribute{
   DrawCardCirt = 14;           // 抽卡暴击率
   SellFrageValueRate = 15;     // 卡片贩卖价值收益(0~1)
   CoinModifyRate = 16;         // 除卖卡外所获得的金钱，其真实获取所要做的修正值的百分比 (0~1)。与ExtraCoinRate的不同在于，此属性对于金币的修改不会影响其经济展示数值
-  
+
   DrawCardCombo1 = 21;
   DrawCardCombo2 = 22;
   DrawCardCombo3 = 23;
@@ -1489,14 +1489,14 @@ message MsgBattleMapControlRsp
 战斗单位信息
 */
 message MsgBattleUnitInfo{
-  uint64 entityId = 1;				//战斗单位实体id
-  uint32 battleUnitDataId = 2;		//战斗单位数据id
-  Position position = 3;			//小常常位置
-  uint64 battleMap = 4;				//小战场id
-  uint64 ownerId = 5;				//拥有者id
-  int32 teamId = 6;					//拥有者team
-  uint32 originPawn = 7;			//原始pawn
-  bool isAdditional = 8;			//是否是额外的
+  uint64 entityId = 1;        //战斗单位实体id
+  uint32 battleUnitDataId = 2;    //战斗单位数据id
+  Position position = 3;      //小常常位置
+  uint64 battleMap = 4;        //小战场id
+  uint64 ownerId = 5;        //拥有者id
+  int32 teamId = 6;          //拥有者team
+  uint32 originPawn = 7;      //原始pawn
+  bool isAdditional = 8;      //是否是额外的
 }
 
 /*
@@ -1591,15 +1591,15 @@ message MsgBattleMapFleeFinishNotify{
 
 ///重要消息 通知战斗结果
 message MsgBattleMapResultNotify{
-  uint64 entityId = 1;					//通知的战斗实体id
-  repeated uint64 restPlayers = 2;		//战场剩余的玩家	
-  repeated uint64 winnerPlayers = 3;	//获胜的玩家	
-  repeated uint64 losePlayers = 4;		//失败的玩家
-  repeated uint64 drawPlayers = 5;		//战平的玩家	
-  uint64 castleId = 6;					//如果在城堡中战斗 城堡的id 没有即为0
-  ETeam winnerTeamId = 7;				//获胜的队伍id
-  uint64 endTick = 8;					//小战斗开始到结束的时间（从0开始）
-  int64 endTimeTick = 9;				//游戏开始到这场战斗结束的时间（从0开始）
+  uint64 entityId = 1;          //通知的战斗实体id
+  repeated uint64 restPlayers = 2;    //战场剩余的玩家	
+  repeated uint64 winnerPlayers = 3;  //获胜的玩家	
+  repeated uint64 losePlayers = 4;    //失败的玩家
+  repeated uint64 drawPlayers = 5;    //战平的玩家	
+  uint64 castleId = 6;          //如果在城堡中战斗 城堡的id 没有即为0
+  ETeam winnerTeamId = 7;        //获胜的队伍id
+  uint64 endTick = 8;          //小战斗开始到结束的时间（从0开始）
+  int64 endTimeTick = 9;        //游戏开始到这场战斗结束的时间（从0开始）
 }
 
 // 战场信息更新通知
@@ -1673,9 +1673,9 @@ enum BattleUnitStateType{
 }
 
 enum BattleDmgType{
-  Dmg = 0;				//伤害
-  Heal = 1;				//治疗
-  CriticalDmg = 2;		//暴击伤害 
+  Dmg = 0;        //伤害
+  Heal = 1;        //治疗
+  CriticalDmg = 2;    //暴击伤害 
 }
 
 
@@ -1683,12 +1683,12 @@ enum BattleDmgType{
 	战斗伤害信息（此消息只是表现型消息 可以不用处理）
 */
 message MsgBattleDmgInfo {
-  uint64 entityId = 1;			//战斗单位实体id
-  uint64 frameTick = 2;			//帧数
-  BattleDmgType dmgType = 3;	//伤害类型
-  uint32 value = 4;				//具体数值
-  uint32 preTaxValue = 5;		//未计算前的数值
-  uint64 attackId = 6;			//攻击对象实体id（也是战斗内的）
+  uint64 entityId = 1;      //战斗单位实体id
+  uint64 frameTick = 2;      //帧数
+  BattleDmgType dmgType = 3;  //伤害类型
+  uint32 value = 4;        //具体数值
+  uint32 preTaxValue = 5;    //未计算前的数值
+  uint64 attackId = 6;      //攻击对象实体id（也是战斗内的）
 }
 
 /*
@@ -1742,10 +1742,10 @@ enum BattleUnitMoveInfoType{
 	战斗单位移动信息
 */
 message MsgBattleUnitMoveInfo {
-  uint64 entityId = 1;						//战斗单位实体id
-  BattleUnitMoveInfoType infoType = 2;		//是移动到格子还是移动到位置	
-  int32 nextCellId = 3;						//下一个格子id	
-  Position toPos = 4;						//移动到的位置 (x,y,z)
+  uint64 entityId = 1;            //战斗单位实体id
+  BattleUnitMoveInfoType infoType = 2;    //是移动到格子还是移动到位置	
+  int32 nextCellId = 3;            //下一个格子id	
+  Position toPos = 4;            //移动到的位置 (x,y,z)
 }
 
 
@@ -1989,12 +1989,33 @@ message MsgTutorialCommandReq{
   repeated string para = 3;
 }
 
+
+message ValidAgentPathParams{
+  uint64 entityId = 1;
+  repeated int32 path = 2; 
+  int32 targetGridIndex = 3;
+
+  int32 row = 4;
+  int32 col = 5;
+}
+
+message ValidAgentPaths{
+  repeated ValidAgentPathParams path = 1;
+}
+
+message ValidAgentActions{
+  ValidAgentPaths validPaths = 1;
+}
+
 message ReconnectGameContext{
   int64 gameStateStartTicks = 1;
   int32 gameState = 2;
   repeated CrystalRingInfo ringInfos = 4;
   int64 gameTimeTicks = 5;
   repeated SpawnerInfo spawnerInfos = 6;
+  int32 maxWinnerScore = 7;
+  int32 mapRow = 8;
+  int32 mapCol = 9;
 }
 
 message ReconnectTeamInfo{
@@ -2066,8 +2087,9 @@ message ReconnectSelfPlayerInfo{
   uint64 selfTeamId = 7;
   repeated EnemyPlayerPawnInfo enemyPlayerPawnInfos = 8;
   int32 restSurrenderCount = 9;
-  repeated MsgPlayerAttributeData attrDatas = 10;
-  MoveCrystalInfo moveCrystalInfo = 11;
+  int32 maxSurrenderCount = 10;
+  repeated MsgPlayerAttributeData attrDatas = 11;
+  MoveCrystalInfo moveCrystalInfo = 12;
 }
 
 message ReconnectSelfTeamMemberInfo{
@@ -2102,6 +2124,7 @@ message MsgReconnectRsp{
   ReconnectSelfPlayerInfo selfPlayerInfo = 9;
   repeated ReconnectFieldInfo fieldInfos = 10;
   repeated MsgBattleHistoryInfoNotify selfBattleHistory = 11;
+  ValidAgentActions validActions = 12;
 }
 
 message MsgInvalidNotify{
@@ -2230,10 +2253,10 @@ message MsgCoreCardDeploySelected
 // 排位赛信息
 message PlayerRankInfo
 {
-	// 段位
-	int32 RankId = 1;
-	// 星数
-	int32 Star = 2;
+  // 段位
+  int32 RankId = 1;
+  // 星数
+  int32 Star = 2;
 }
 
 message SeatPlayer{
@@ -2330,7 +2353,7 @@ message SpawnerInfo{
   // 要刷出目标单位的地格下标
   int32 targetGridIndex = 4;
   // 要刷出的目标单位tid（依据刷怪器的类型分别对应 CSVGridProp.Id 或 CSVSquad.Id）
-  uint32 targetDataId = 5; 
+  uint32 targetDataId = 5;
 }
 
 // 刷怪器信息通知
