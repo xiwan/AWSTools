@@ -60,9 +60,9 @@ class TcpConnector(object):
                 msg = self.outQ.get(timeout=0.5)
                 self.outQ.task_done()
             except queue.Empty: 
-                logging.info(f"Out queue.Empty")
+                print(f"Out queue.Empty")
                 msg = getbyteLitte(0000)    
-            logging.info(f'### FetchMsg ### {msg}')
+            print(f'### FetchMsg ### {msg}')
             return msg
         
     async def FetchStateDictMsg(self, code):
@@ -72,9 +72,9 @@ class TcpConnector(object):
                 msg = self.stateDict[code].get(timeout=0.5)
                 self.stateDict[code].task_done()
             except queue.Empty:
-                logging.info(f"stateDict queue.Empty")
+                print(f"stateDict queue.Empty")
                 msg = getbyteLitte(0000)
-            logging.info(f'### FetchSateDictMsg ### {msg}')
+            print(f'### FetchSateDictMsg ### {msg}')
             return msg
 
     def OnOpen(self):
