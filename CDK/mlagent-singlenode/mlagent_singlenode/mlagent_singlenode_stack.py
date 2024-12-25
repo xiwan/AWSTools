@@ -34,8 +34,16 @@ class MlagentSinglenodeStack(Stack):
             description="EBS Volume Size (GiB)"
         )
 
+        region_code = CfnParameter(
+            self, "RegionCodeParam",
+            type="String",
+            default="us-east-2",
+            allowed_values=["us-east-1", "us-east-2", "us-west-1", "us-west-2"],
+            description="Region Code"
+        )
+
         node_type_param = self.node.try_get_context('node')
-        print(node_type_param)
+        # print(node_type_param)
         # 获取默认 VPC
         defaultVPC = ec2.Vpc.from_lookup(self, "default", is_default=True)
         # 选择私有子网
@@ -116,6 +124,6 @@ class MlagentSinglenodeStack(Stack):
             CfnOutput(
                 self,
                 "NotebookInstanceUrl",
-                value=f"https://{self.region}.console.aws.amazon.com/sagemaker/home?region={self.region}#/notebook-instances/openNotebook/{notebook_instance.attr_notebook_instance_name}?view=lab",
+                value=f"https://{region_code.value_as_string}.console.aws.amazon.com/sagemaker/home?region={region_code.value_as_string}#/notebook-instances/openNotebook/{notebook_instance.attr_notebook_instance_name}?view=lab",
                 description="Notebook Instance URL"
             )

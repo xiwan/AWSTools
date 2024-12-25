@@ -103,12 +103,12 @@ def makesg(profile, sgid, vpcid, source, destin, shell):
     else:    
         filtered = {dest:vpc for dest,vpc in destinations.items() if dest not in [source] and vpcid in vpc}
 
-    print(destinations)
+    # print(destinations)
     print(filtered)
 
     for dest,vpc in filtered.items():
-        print(dest)
-        print(vpc)
+        # print(dest)
+        # print(vpc)
         ap = subprocess.check_output(cmd)
         if ap is not None:
             delete_cmd = "aws ec2 delete-security-group"
