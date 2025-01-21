@@ -2125,6 +2125,8 @@ message MsgReconnectRsp{
   repeated ReconnectFieldInfo fieldInfos = 10;
   repeated MsgBattleHistoryInfoNotify selfBattleHistory = 11;
   ValidAgentActions validActions = 12;
+  bool isGameover = 13;
+  MsgGameOverNotify gameRank = 14;
 }
 
 message MsgInvalidNotify{
