@@ -43,6 +43,8 @@ def before_reql(*args, **kwargs):
             ts = TcpConnector()
             if not ts or not uid:
                 return str(404)
+            if not ts.active:
+                return str(500)
     else:
         return str(404)
 

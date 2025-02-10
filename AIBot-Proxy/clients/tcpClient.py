@@ -19,6 +19,7 @@ tcpdata = int(config['tcpdata'])
 @singleton
 class TcpConnector(object):
     def __init__(self):
+        self.active = False
         self.tcp_socket = None
         self.server_addr = None
         self.remoteTcp = None
@@ -96,6 +97,7 @@ class TcpConnector(object):
                 logging.info(f"### TcpConnector OnOpen ### socket.error: {e}")
                 failed_try += 1
                 if failed_try > 3:
+                    self.active = False
                     return
                 time.sleep(1)
 
@@ -171,6 +173,7 @@ class TcpConnector(object):
                 logging.info(f"### TcpConnector OnMessage ### socket.error: {e}")
                 failed_try += 1
                 if failed_try > 3:
+                    self.active = False
                     return
                 time.sleep(1)
 
@@ -183,6 +186,7 @@ class TcpConnector(object):
                 self.server_addr = (server_addr_array[0], int(server_addr_array[1]))
                 self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.tcp_socket.connect(self.server_addr)
+                self.active = True
                 break
             except Exception as e:
                 logging.info(f"### TcpConnector Connect ### socket.error: {e}")
@@ -213,11 +217,21 @@ class TcpConnector(object):
 
     def Close(self):
         self.tcp_socket.close()
+        self.active = False
+        pass
+
+    def OnCloseOrError(self):
+        self.active = False
+        pass
 
     @run_async
     async def OnConnect(self, remoteTcp):
         self.remoteTcp = remoteTcp
-        self.Connect(remoteTcp, on_open = self.OnOpen, on_message = self.OnMessage)
+        self.Connect(remoteTcp, 
+                     on_open = self.OnOpen,
+                     on_message = self.OnMessage, 
+                     on_close=self.OnCloseOrError, 
+                     on_error=self.OnCloseOrError)
         logging.info(f"### WssConnector OnConnect ### remoteUri: {remoteTcp}")
         pass
 
